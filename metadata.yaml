@@ -1,0 +1,8 @@
+name: astrbot_plugin_qq_face_enhancer
+display_name: QQ表情运用增强
+desc: 让 AstrBot 理解并安全使用 OneBot QQ 表情，支持按需语义检索和夜间语境学习
+version: 1.0.0
+author: Codex
+astrbot_version: ">=4.26,<5"
+support_platforms:
+  - aiocqhttp

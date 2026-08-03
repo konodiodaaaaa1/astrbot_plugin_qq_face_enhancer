@@ -1,0 +1,77 @@
+{
+  "enable_annotation": {
+    "type": "bool",
+    "description": "把收到的 QQ 表情转换为模型可理解的短标识，不修改原消息链",
+    "default": true
+  },
+  "enable_tools": {
+    "type": "bool",
+    "description": "启用 QQ 表情语义检索和发送工具",
+    "default": true
+  },
+  "allow_send": {
+    "type": "bool",
+    "description": "允许模型发送已经过目录校验的 QQ 官方表情",
+    "default": false
+  },
+  "napcat_face_config_path": {
+    "type": "string",
+    "description": "本机 NapCat face_config.json 的绝对路径；可用 /qqface napcat find 查找",
+    "default": ""
+  },
+  "external_catalog_path": {
+    "type": "string",
+    "description": "可选的外部语义目录 JSON 绝对路径",
+    "default": ""
+  },
+  "external_catalog_url": {
+    "type": "string",
+    "description": "可选的 HTTPS 外部语义目录 URL",
+    "default": ""
+  },
+  "sync_timeout_seconds": {
+    "type": "int",
+    "description": "外部 HTTPS 目录同步超时秒数",
+    "default": 20
+  },
+  "chain_state_ttl_seconds": {
+    "type": "int",
+    "description": "超级表情接龙状态在会话内的有效秒数，范围 15-1800",
+    "default": 180
+  },
+  "context_window_size": {
+    "type": "int",
+    "description": "夜间语境学习为每个会话保留的近期消息数，范围 2-20",
+    "default": 8
+  },
+  "learning_enabled": {
+    "type": "bool",
+    "description": "启用不向会话输出消息的夜间语境学习任务",
+    "default": true
+  },
+  "learning_time": {
+    "type": "string",
+    "description": "夜间学习时间，使用 AstrBot 主机本地时区，格式 HH:MM",
+    "default": "03:30"
+  },
+  "learning_max_samples": {
+    "type": "int",
+    "description": "每次夜间学习最多处理的新增样本数，范围 1-500",
+    "default": 100
+  },
+  "learning_retained_samples": {
+    "type": "int",
+    "description": "本地最多保留的上下文样本行数，范围 200-50000",
+    "default": 5000
+  },
+  "learning_provider_id": {
+    "type": "string",
+    "description": "夜间学习使用的 Provider ID；留空使用 AstrBot 当前默认 Provider",
+    "default": ""
+  },
+  "learning_timeout_seconds": {
+    "type": "int",
+    "description": "夜间学习单次模型调用超时秒数",
+    "default": 120
+  }
+}
