@@ -39,13 +39,19 @@ async def _send_onebot_segments(event: Any, segments: list[dict[str, Any]]) -> N
 
 
 def _advanced_segment(
-    record: FaceRecord, chain_count: int | None = None
+    record: FaceRecord,
+    chain_count: int | None = None,
+    result_id: str = "",
 ) -> dict[str, Any]:
-    if record.id == "358":
+    # NapCat's dice/rps shortcuts ignore their result field. An explicit
+    # result_id therefore must use a face segment so it reaches resultId.
+    if record.id == "358" and not result_id:
         return {"type": "dice", "data": {"result": "0"}}
-    if record.id == "359":
+    if record.id == "359" and not result_id:
         return {"type": "rps", "data": {"result": "0"}}
     data: dict[str, Any] = {"id": record.id}
+    if result_id:
+        data["resultId"] = result_id
     if chain_count is not None:
         data["chainCount"] = chain_count
     return {"type": "face", "data": data}
@@ -60,6 +66,8 @@ async def send_face(
     text: str = "",
     send_mode: str = "auto",
     chain_action: str = "auto",
+    result_id: str = "",
+    chain_count: int | str | None = None,
     chain_tracker: ChainStateTracker | None = None,
 ) -> str:
     if event.get_platform_name() != "aiocqhttp":
@@ -80,6 +88,25 @@ async def send_face(
     if chain_action not in {"auto", "start", "continue"}:
         return "发送失败：chain_action 只能是 auto、start 或 continue。"
 
+    raw_result_id = "" if result_id is None else str(result_id)
+    if len(raw_result_id) > 128 or any(ord(char) < 32 for char in raw_result_id):
+        return "发送失败：result_id 必须是不超过 128 个字符的单行字符串。"
+    clean_result_id = raw_result_id.strip()
+
+    explicit_chain_count = chain_count not in (None, "")
+    parsed_chain_count: int | None = None
+    if explicit_chain_count:
+        if record.face_kind != "chain_super":
+            return "发送失败：chain_count 仅适用于接龙超级表情（chain_super）。"
+        raw_chain_count = str(chain_count).strip()
+        if not raw_chain_count or any(
+            char not in "0123456789" for char in raw_chain_count
+        ):
+            return "发送失败：chain_count 必须是正整数。"
+        parsed_chain_count = int(raw_chain_count)
+        if parsed_chain_count <= 0:
+            return "发送失败：chain_count 必须是正整数。"
+
     clean_text = str(text or "").strip()
     effective_mode = send_mode
     if effective_mode == "auto":
@@ -93,27 +120,42 @@ async def send_face(
     if effective_mode == "standalone":
         clean_text = ""
 
-    chain_count: int | None = None
+    effective_chain_count: int | None = None
     if record.face_kind == "chain_super":
-        if record.chain_role == "start":
+        if parsed_chain_count is not None:
+            if record.chain_role == "start" and chain_action == "continue":
+                return "发送失败：接龙起点不能作为续接表情发送。"
+            if record.chain_role != "start" and chain_action == "start":
+                return "发送失败：接龙中段/收尾不能作为接龙起点发送。"
+            effective_chain_count = parsed_chain_count
+        elif record.chain_role == "start":
             if chain_action == "continue":
                 return "发送失败：接龙起点不能作为续接表情发送。"
-            chain_count = 1
+            effective_chain_count = 1
         else:
             if chain_action == "start":
                 return "发送失败：接龙中段/收尾不能脱离同组接龙单独起头。"
             if chain_tracker is None:
                 return "发送失败：当前没有可验证的接龙状态。"
-            chain_count = chain_tracker.continuation_count(_session_id(event), record)
-            if chain_count is None:
+            effective_chain_count = chain_tracker.continuation_count(
+                _session_id(event), record
+            )
+            if effective_chain_count is None:
                 return f"发送失败：近期会话中没有可续接的 {record.chain_group} 接龙。"
 
-    uses_raw = record.face_kind == "chain_super" or record.id in {"358", "359"}
+    uses_raw = (
+        record.face_kind == "chain_super"
+        or record.id in {"358", "359"}
+        or bool(clean_result_id)
+        or parsed_chain_count is not None
+    )
     if uses_raw:
         segments: list[dict[str, Any]] = []
         if clean_text:
             segments.append({"type": "text", "data": {"text": clean_text}})
-        segments.append(_advanced_segment(record, chain_count))
+        segments.append(
+            _advanced_segment(record, effective_chain_count, clean_result_id)
+        )
         try:
             await _send_onebot_segments(event, segments)
         except Exception as exc:
@@ -126,7 +168,7 @@ async def send_face(
         await event.send(MessageChain(chain))
 
     if chain_tracker and record.face_kind == "chain_super":
-        chain_tracker.observe(_session_id(event), record, chain_count)
+        chain_tracker.observe(_session_id(event), record, effective_chain_count)
     event.set_extra("qqface.tool_sent", True)
     kind_label = {
         "normal": "普通表情",
@@ -134,4 +176,9 @@ async def send_face(
         "random_super": "随机超级表情",
         "chain_super": "接龙超级表情",
     }.get(record.face_kind, "表情")
-    return f"已发送 QQ {kind_label}：{record.canonical_name}（face_id={record.id}，{effective_mode}）。"
+    details = [f"face_id={record.id}", effective_mode]
+    if clean_result_id:
+        details.append(f"resultId={clean_result_id}")
+    if parsed_chain_count is not None:
+        details.append(f"chainCount={parsed_chain_count}")
+    return f"已发送 QQ {kind_label}：{record.canonical_name}（{'，'.join(details)}）。"

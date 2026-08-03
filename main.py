@@ -11,14 +11,131 @@ from astrbot.api.event import AstrMessageEvent, filter
 from astrbot.api.star import Context, Star
 from astrbot.core.star.star_tools import StarTools
 
-from .qqface.catalog import FaceCatalog, find_napcat_face_configs
+from .qqface.catalog import (
+    FACE_KINDS,
+    FaceCatalog,
+    FaceRecord,
+    find_napcat_face_configs,
+)
 from .qqface.chain import ChainStateTracker
 from .qqface.learning import LearningWorker
 from .qqface.parser import annotate_event
 from .qqface.sender import send_face
 
 PLUGIN_NAME = "astrbot_plugin_qq_face_enhancer"
-PLUGIN_VERSION = "1.0.0"
+PLUGIN_VERSION = "1.2.0"
+VALID_KINDS = set(FACE_KINDS.values())
+VALID_VISIBILITY = {"any", "hidden", "visible"}
+VALID_CHAIN_ROLES = {"", "start", "middle", "end"}
+
+
+def _send_parameters(record: FaceRecord) -> dict[str, Any]:
+    parameters: dict[str, Any] = {
+        "send_mode": ["auto", "standalone", "mixed"],
+        "text": "仅 mixed 模式使用；超级表情通常保持单独发送",
+    }
+    if record.face_kind == "random_super":
+        parameters.update(
+            {
+                "chain_action": ["auto"],
+                "result_id": "可选；传入后原样作为 OneBot face.data.resultId",
+            }
+        )
+    elif record.face_kind == "chain_super":
+        action = "start" if record.chain_role == "start" else "continue"
+        parameters.update(
+            {
+                "chain_action": [action],
+                "chain_count": "可选正整数；传入后覆盖会话状态并直接指定接龙次数",
+                "result_id": "可选；传入后原样作为 OneBot face.data.resultId",
+            }
+        )
+    else:
+        parameters["chain_action"] = ["auto"]
+        parameters["result_id"] = "可选；传入后原样作为 OneBot face.data.resultId"
+        parameters["chain_count"] = "仅 chain_super 支持"
+    return parameters
+
+
+def _record_capabilities(catalog: FaceCatalog, record: FaceRecord) -> dict[str, Any]:
+    full = catalog.display(record)
+    return {
+        "face_id": record.id,
+        "name": record.canonical_name,
+        "family": record.family,
+        "kind": record.face_kind,
+        "hidden": record.hidden,
+        "face_type": record.face_type,
+        "sticker_type": record.sticker_type,
+        "pack_id": record.pack_id,
+        "pack_name": record.pack_name,
+        "sticker_id": record.sticker_id,
+        "em_code": record.em_code,
+        "social_meanings": record.social_meanings,
+        "tone": record.tone,
+        "usage_contexts": record.usage_contexts,
+        "avoid_contexts": record.avoid_contexts,
+        "standalone_preferred": record.standalone_preferred,
+        "chain_group": record.chain_group,
+        "chain_role": record.chain_role,
+        "sendable": record.sendable,
+        "send_parameters": _send_parameters(record),
+        "learned_observations": full["learned_observations"],
+    }
+
+
+def _capability_summary(
+    catalog: FaceCatalog, include_hidden: bool = True
+) -> dict[str, Any]:
+    records = catalog.system_records()
+    categories: dict[str, dict[str, Any]] = {}
+    for kind in FACE_KINDS.values():
+        members = [record for record in records if record.face_kind == kind]
+        category: dict[str, Any] = {
+            "total": len(members),
+            "sendable": sum(record.sendable for record in members),
+        }
+        if include_hidden:
+            hidden_members = [record for record in members if record.hidden]
+            category.update(
+                {
+                    "hidden": len(hidden_members),
+                    "hidden_examples": [
+                        {"face_id": record.id, "name": record.canonical_name}
+                        for record in hidden_members[:8]
+                    ],
+                }
+            )
+        categories[kind] = category
+
+    chain_groups: dict[str, dict[str, str]] = defaultdict(dict)
+    for record in records:
+        if record.chain_group and record.chain_role:
+            chain_groups[record.chain_group][record.chain_role] = record.id
+
+    return {
+        "catalog_version": catalog.catalog_meta.get("catalog_version", "unknown"),
+        "total": len(records),
+        "categories": categories,
+        "hidden_semantics": (
+            "hidden=true 表示 QQ 客户端入口隐藏，不等于不可发送；以 sendable 为准"
+        ),
+        "random_result": (
+            "默认由 QQ 服务端产生；模型可通过 result_id 显式指定并原样透传"
+        ),
+        "chain_groups": dict(chain_groups),
+        "chain_semantics": (
+            "默认按会话状态计算 chainCount；传入 chain_count 正整数时覆盖状态，"
+            "可直接指定接龙次数"
+        ),
+        "send_qq_face_parameters": {
+            "send_mode": ["auto", "standalone", "mixed"],
+            "chain_action": ["auto", "start", "continue"],
+            "text": "mixed 模式下的同条文字",
+            "result_id": "可选字符串，原样透传到 face.data.resultId",
+            "chain_count": "可选正整数；仅 chain_super 生效，覆盖自动状态",
+        },
+    }
 
 
 class QQFaceEnhancer(Star):
@@ -75,6 +192,9 @@ class QQFaceEnhancer(Star):
         query: str,
         tone: str = "",
         family: str = "system_face",
+        kind: str = "",
+        hidden: str = "any",
+        chain_role: str = "",
         limit: int = 5,
     ) -> str:
         """Search known QQ faces by name, social meaning, tone and context.
@@ -83,6 +203,9 @@ class QQFaceEnhancer(Star):
             query(string): 要表达的意图、表情名称或社交语境。
             tone(string): 可选语气，例如友好、调侃、吐槽、安慰。
             family(string): 表情类别，发送时使用 system_face。
+            kind(string): 可选能力类型：normal、super、random_super、chain_super。
+            hidden(string): 可见性筛选：any、hidden、visible。
+            chain_role(string): 可选接龙角色：start、middle、end。
             limit(number): 返回候选数量，最大 5 条。
         """
         _ = event
@@ -92,29 +215,61 @@ class QQFaceEnhancer(Star):
             safe_limit = max(1, min(int(limit or 5), 5))
         except (TypeError, ValueError):
             safe_limit = 5
-        records = self.catalog.search(query, tone=tone, family=family, limit=safe_limit)
+        safe_kind = str(kind or "").strip().lower()
+        safe_hidden = str(hidden or "any").strip().lower()
+        safe_chain_role = str(chain_role or "").strip().lower()
+        if safe_kind and safe_kind not in VALID_KINDS:
+            return "kind 无效；可用值：normal、super、random_super、chain_super。"
+        if safe_hidden not in VALID_VISIBILITY:
+            return "hidden 无效；可用值：any、hidden、visible。"
+        if safe_chain_role not in VALID_CHAIN_ROLES:
+            return "chain_role 无效；可用值：start、middle、end。"
+        records = self.catalog.search(
+            query,
+            tone=tone,
+            family=family,
+            kind=safe_kind,
+            hidden=safe_hidden,
+            chain_role=safe_chain_role,
+            limit=safe_limit,
+        )
         if not records:
             return "没有找到匹配的 QQ 表情；不要猜测 face_id。"
         results = []
         for record in records:
-            full = self.catalog.display(record)
-            results.append(
-                {
-                    "face_id": record.id,
-                    "name": record.canonical_name,
-                    "kind": record.face_kind,
-                    "social_meanings": record.social_meanings,
-                    "tone": record.tone,
-                    "usage_contexts": record.usage_contexts,
-                    "avoid_contexts": record.avoid_contexts,
-                    "standalone_preferred": record.standalone_preferred,
-                    "chain_group": record.chain_group,
-                    "chain_role": record.chain_role,
-                    "sendable": record.sendable,
-                    "learned_observations": full["learned_observations"],
-                }
-            )
+            results.append(_record_capabilities(self.catalog, record))
         return json.dumps(results, ensure_ascii=False)
+
+    @filter.llm_tool(name="describe_qq_face_capabilities")
+    async def describe_qq_face_capabilities(
+        self,
+        event: AstrMessageEvent,
+        face_id: str = "",
+        include_hidden: bool = True,
+    ) -> str:
+        """Describe current QQ face categories, special fields and send controls.
+
+        Args:
+            face_id(string): 可选精确数字 ID；为空时返回当前目录能力摘要。
+            include_hidden(boolean): 摘要中是否包含隐藏统计和少量示例。
+        """
+        _ = event
+        if not bool(self.config.get("enable_tools", True)):
+            return "QQ 表情工具当前已关闭。"
+        safe_face_id = str(face_id or "").strip()
+        if not safe_face_id:
+            return json.dumps(
+                _capability_summary(self.catalog, bool(include_hidden)),
+                ensure_ascii=False,
+            )
+        if not safe_face_id.isdigit():
+            return "face_id 必须是数字；不要猜测特殊表情 ID。"
+        record = self.catalog.get(safe_face_id)
+        if not record:
+            return f"目录中没有 face_id={safe_face_id}；不要猜测该 ID。"
+        return json.dumps(
+            _record_capabilities(self.catalog, record), ensure_ascii=False
+        )
 
     @filter.llm_tool(name="send_qq_face")
     async def send_qq_face(
@@ -125,6 +280,8 @@ class QQFaceEnhancer(Star):
         text: str = "",
         send_mode: str = "auto",
         chain_action: str = "auto",
+        result_id: str = "",
+        chain_count: int | str | None = None,
         reason: str = "",
     ) -> str:
         """Send one validated QQ face to the current OneBot conversation.
@@ -135,6 +292,8 @@ class QQFaceEnhancer(Star):
             text(string): mixed 模式下与表情同条发送的文字；通常留空。
             send_mode(string): auto、standalone 或 mixed；超级表情默认 standalone。
             chain_action(string): auto、start 或 continue；续接必须匹配近期会话状态。
+            result_id(string): 可选，显式指定 OneBot face.data.resultId；不传则由 QQ 产生或省略。
+            chain_count(number): 可选正整数；chain_super 传入后覆盖会话状态，直接指定接龙次数。
             reason(string): 可选，说明选择该表情的语境，不会发送给用户。
         """
         _ = reason
@@ -150,6 +309,8 @@ class QQFaceEnhancer(Star):
             text=text,
             send_mode=send_mode,
             chain_action=chain_action,
+            result_id=result_id,
+            chain_count=chain_count,
             chain_tracker=self.chain_tracker,
         )
 

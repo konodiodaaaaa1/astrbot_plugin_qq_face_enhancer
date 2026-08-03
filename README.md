@@ -12,8 +12,8 @@
 - 从原始 OneBot 事件保留 `resultId`、`chainCount`、`faceType` 和 NapCat `raw` 表情元素。
 - 识别 `mface` 商城表情并保留包 ID、表情 ID 和摘要；首次收到时以不可发送记录落盘，供检索和夜间学习使用。为防止错发，1.0.0 暂不发送 `mface`。
 - 提供 `search_qq_face` 和 `send_qq_face` 模型工具。
-- 骰子和包剪锤使用 NapCat 专用随机消息段，不伪造固定结果。
-- 接龙中段/收尾必须匹配近期同一会话的同组接龙状态。
+- 骰子和包剪锤默认使用 NapCat 专用随机消息段；传入 `result_id` 时改用 `face` 段显式写入 `resultId`。
+- 接龙中段/收尾默认匹配近期同一会话状态；传入正整数 `chain_count` 时可直接指定接龙次数。
 - 支持从本机 NapCat `face_config.json` 校验、比较并原子更新运行目录。
 - 夜间后台学习可以新增、更新、废弃或删除本地语境观察，并写入审计日志。
 
@@ -135,11 +135,16 @@ Get-ChildItem -LiteralPath $roots -Filter face_config.json -File -Recurse `
 ## 发送规则
 
 - 模型必须先用 `search_qq_face` 获取精确 ID。
+- `search_qq_face` 支持 `kind`、`hidden`、`chain_role` 筛选，并返回隐藏状态、贴纸类型和发送参数。
+- `describe_qq_face_capabilities` 可查询当前目录的特殊分类摘要或单个 ID 的完整能力。
+- `hidden=true` 仅代表 QQ 客户端入口隐藏；是否允许发送以 `sendable` 为准。
 - 超级表情在 `send_mode=auto` 下默认单独发送。
+- `send_qq_face` 的 `result_id` 可选传入并原样写入 `face.data.resultId`；不传时由 QQ 产生或省略。
+- `send_qq_face` 的 `chain_count` 可选传入正整数；对接龙表情会覆盖会话状态，直接指定接龙次数；不传时保持自动续接校验。
 - `send_mode=mixed` 必须显式提供同条发送的 `text`。
-- 骰子 `358` 和包剪锤 `359` 使用随机段，结果由 QQ 客户端/协议端生成。
+- 骰子 `358` 和包剪锤 `359` 默认使用随机段，结果由 QQ 客户端/协议端生成；传 `result_id` 时改用 `face.data.resultId` 显式控制。
 - 篮球 `114` 作为随机超级表情按官方 `face` 段发送。
-- 接龙起点可以开始新接龙；中段与收尾没有匹配状态时会拒绝发送。
+- 接龙起点可以开始新接龙；中段与收尾在未传 `chain_count` 且没有匹配状态时会拒绝发送。
 - 商城 `mface` 只理解和学习，不发送。
 
 ## 夜间学习与数据
@@ -162,7 +167,7 @@ unknown_faces.json
 
 ## 故障排查
 
-- 报错 `get_data_dir`：确认安装的是 1.0.0 ZIP，`main.py` 应使用 `StarTools.get_data_dir(...)`。
+- 报错 `get_data_dir`：确认安装的是 1.0.0 或更高版本 ZIP，`main.py` 应使用 `StarTools.get_data_dir(...)`。
 - 目录仍不是 296 条：执行 `/qqface status`，确认没有错误的外部目录覆盖；再执行 `/qqface reload`。
 - NapCat 同步失败：确认填写的是文件而不是目录，并确认 JSON 中存在 `sysface` 数组。
 - 能检索但不能发送：检查 `allow_send=true`，并确认当前事件平台为 `aiocqhttp`。

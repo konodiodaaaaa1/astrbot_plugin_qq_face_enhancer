@@ -15,6 +15,17 @@ from typing import Any, Iterable
 CATALOG_FILE = Path(__file__).with_name("default_catalog.json")
 NAPCAT_CACHE_FILE = "napcat_catalog.json"
 FACE_KINDS = {0: "normal", 1: "super", 2: "random_super", 3: "chain_super"}
+FACE_KIND_ALIASES = {
+    "normal": "普通 基础 normal",
+    "super": "超级 动画 super",
+    "random_super": "随机 随机超级 random random_super",
+    "chain_super": "接龙 连击 接龙超级 chain chain_super",
+}
+CHAIN_ROLE_ALIASES = {
+    "start": "起点 开始 start",
+    "middle": "中段 续接 middle",
+    "end": "收尾 结束 end",
+}
 CHAIN_GROUPS = {
     "392": ("dragon_2024", "start"),
     "393": ("dragon_2024", "middle"),
@@ -477,17 +488,41 @@ class FaceCatalog:
         return record
 
     def search(
-        self, query: str, *, tone: str = "", family: str = "", limit: int = 5
+        self,
+        query: str,
+        *,
+        tone: str = "",
+        family: str = "",
+        kind: str = "",
+        hidden: str = "any",
+        chain_role: str = "",
+        limit: int = 5,
     ) -> list[FaceRecord]:
         query_terms = [
             term for term in re.findall(r"[\w\u4e00-\u9fff]+", query.lower()) if term
         ]
         tone_term = tone.strip().lower()
+        has_structured_filter = bool(kind or hidden != "any" or chain_role)
         scored: list[tuple[int, float, FaceRecord]] = []
         for record in self.records.values():
             if family and record.family != family:
                 continue
-            haystack = record.searchable_text()
+            if kind and record.face_kind != kind:
+                continue
+            if hidden == "hidden" and not record.hidden:
+                continue
+            if hidden == "visible" and record.hidden:
+                continue
+            if chain_role and record.chain_role != chain_role:
+                continue
+            haystack = " ".join(
+                (
+                    record.searchable_text(),
+                    FACE_KIND_ALIASES.get(record.face_kind, ""),
+                    "隐藏 hidden" if record.hidden else "可见 visible",
+                    CHAIN_ROLE_ALIASES.get(record.chain_role, ""),
+                )
+            ).lower()
             learned = " ".join(
                 str(item.get("meaning", ""))
                 for item in self.observations.get(record.key, [])
@@ -506,7 +541,7 @@ class FaceCatalog:
             )
             if tone_term and tone_term in " ".join(record.tone).lower():
                 score += 3
-            if score:
+            if score or (not query_terms and has_structured_filter):
                 scored.append((score, record.confidence, record))
         scored.sort(
             key=lambda item: (
