@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.1 - 2026-08-04
+
+- 附带可选的 NapCat companion plugin，使超级、随机、接龙及扩展 ID 可以绕过标准 OneBot `sysface` 白名单限制。
+- 原生发送完整保留 `packId`、`stickerId`、`stickerType`、`randomType`、`resultId` 和 `chainCount`。
+- 新增 NapCat 扩展 API 地址、共享 Token 和超时配置，并优化 AstrBot 配置界面的说明、占位提示和条件显示。
+- 修正 NapCat WebUI 配置 schema，并确保首次安装时能够创建配置目录和持久化共享 Token。
+- 修复私聊原生发送直接将数字 QQ 号作为 QQNT `peerUid` 的问题；现在会先解析内部 UID，避免 `MsgApi.sendMsg` 阻塞超时。
+
 ## 1.2.0 - 2026-08-03
 
 - `send_qq_face` 新增可选 `result_id`，显式发送时改走 `face.data.resultId`，支持模型控制随机/超级表情结果字段。

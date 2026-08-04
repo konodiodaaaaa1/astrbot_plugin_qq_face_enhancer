@@ -23,7 +23,7 @@ from .qqface.parser import annotate_event
 from .qqface.sender import send_face
 
 PLUGIN_NAME = "astrbot_plugin_qq_face_enhancer"
-PLUGIN_VERSION = "1.2.0"
+PLUGIN_VERSION = "1.2.1"
 VALID_KINDS = set(FACE_KINDS.values())
 VALID_VISIBILITY = {"any", "hidden", "visible"}
 VALID_CHAIN_ROLES = {"", "start", "middle", "end"}
@@ -312,6 +312,7 @@ class QQFaceEnhancer(Star):
             result_id=result_id,
             chain_count=chain_count,
             chain_tracker=self.chain_tracker,
+            config=self.config,
         )
 
     @filter.command("qqface")

@@ -1,0 +1,8 @@
+{
+  "name": "napcat-plugin-qq-face-enhancer",
+  "version": "0.1.0",
+  "description": "Direct native QQ face sender for AstrBot QQ face enhancer",
+  "main": "index.mjs",
+  "type": "module",
+  "author": "Codex"
+}

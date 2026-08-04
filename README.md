@@ -177,3 +177,21 @@ unknown_faces.json
 ## 数据来源与许可证
 
 内置目录是从 NapCatQQ 指定版本提取的规范化子集，不包含原始 `face_config.json`。详情见 `THIRD_PARTY_NOTICES.md` 和 `licenses/NAPCAT-LICENSE.txt`。NapCat 的许可包含非商业使用限制，部署前请自行确认适用范围。
+## 扩展表情原生发送
+
+标准 OneBot `face` 会先经过 NapCat 内置 `sysface` 校验，因而目录中存在
+450+ 或隐藏超级表情时仍可能被拦截。项目仓库附带一个可选的 NapCat companion
+plugin，直接调用 NapCat `core.apis.MsgApi.sendMsg`，保留动画包、随机结果和
+接龙字段。companion 不包含在 AstrBot 插件 ZIP 中，需要单独安装到 NapCat。
+
+1. 将 `napcat_companion/napcat-plugin-qq-face-enhancer` 复制到 NapCat 的
+   `plugins` 目录，在 NapCat WebUI 中启用它，然后重启或重载插件。
+2. 在本插件配置中填写 `napcat_extended_api_url`，格式为
+   `http://127.0.0.1:<NapCat HTTP端口>/plugin/napcat-plugin-qq-face-enhancer/api`。
+3. 在 companion 中设置 token，并将同一个值填入
+   `napcat_extended_api_token`；未配置 token 时发送路由保持禁用。
+
+配置完成后，超级、随机、接龙以及大于 432 的表情会优先使用原生发送；
+companion 不可达时才回退标准 OneBot。当前 NapCat 运行时没有内置动态
+`BaseEmojiService`，所以想自动拉取客户端新增目录仍建议升级 NapCat；升级
+不是使用已知 `face_config` 元数据进行原生发送的前置条件。

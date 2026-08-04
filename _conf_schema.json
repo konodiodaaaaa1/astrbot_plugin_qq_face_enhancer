@@ -1,77 +1,146 @@
 {
   "enable_annotation": {
     "type": "bool",
-    "description": "把收到的 QQ 表情转换为模型可理解的短标识，不修改原消息链",
+    "description": "接收表情语义标注",
+    "hint": "将收到的 QQ 表情转换为模型可理解的短标识，不修改原消息链。",
     "default": true
   },
   "enable_tools": {
     "type": "bool",
-    "description": "启用 QQ 表情语义检索和发送工具",
+    "description": "启用模型表情工具",
+    "hint": "允许模型按名称、语气、社交含义检索 QQ 表情，并使用发送工具。",
     "default": true
   },
   "allow_send": {
     "type": "bool",
-    "description": "允许模型发送已经过目录校验的 QQ 官方表情",
+    "description": "允许模型发送表情",
+    "hint": "仅允许发送目录中已校验且标记为可发送的 QQ 官方表情。",
     "default": false
+  },
+  "napcat_extended_api_url": {
+    "type": "string",
+    "description": "NapCat 扩展 API 地址",
+    "hint": "留空时使用标准 OneBot 发送。示例：http://127.0.0.1:3000/plugin/napcat-plugin-qq-face-enhancer/api",
+    "default": ""
+  },
+  "napcat_extended_api_token": {
+    "type": "string",
+    "description": "NapCat 扩展 API Token",
+    "hint": "须与 NapCat companion plugin 中配置的 Token 完全一致；未启用扩展 API 时留空。",
+    "default": ""
+  },
+  "napcat_extended_api_timeout_seconds": {
+    "type": "int",
+    "description": "NapCat 请求超时（秒）",
+    "hint": "扩展 API 单次请求的最长等待时间，范围 1-30 秒。",
+    "default": 8,
+    "slider": {
+      "min": 1,
+      "max": 30,
+      "step": 1
+    }
   },
   "napcat_face_config_path": {
     "type": "string",
-    "description": "本机 NapCat face_config.json 的绝对路径；可用 /qqface napcat find 查找",
+    "description": "NapCat 表情配置路径",
+    "hint": "填写 face_config.json 的绝对路径；可执行 /qqface napcat find 自动查找。示例：D:\\QQ\\NapCat\\resources\\face_config.json",
     "default": ""
   },
   "external_catalog_path": {
     "type": "string",
-    "description": "可选的外部语义目录 JSON 绝对路径",
+    "description": "本地扩展语义目录",
+    "hint": "可选。填写外部表情语义目录 JSON 的绝对路径；留空则不加载。",
     "default": ""
   },
   "external_catalog_url": {
     "type": "string",
-    "description": "可选的 HTTPS 外部语义目录 URL",
+    "description": "远程扩展语义目录",
+    "hint": "可选。填写可信的 HTTPS JSON 地址；留空则不启用远程同步。",
     "default": ""
   },
   "sync_timeout_seconds": {
     "type": "int",
-    "description": "外部 HTTPS 目录同步超时秒数",
+    "description": "目录同步超时（秒）",
+    "hint": "下载远程语义目录的最长等待时间。",
     "default": 20
   },
   "chain_state_ttl_seconds": {
     "type": "int",
-    "description": "超级表情接龙状态在会话内的有效秒数，范围 15-1800",
-    "default": 180
+    "description": "接龙状态有效期（秒）",
+    "hint": "超过该时间后不再沿用会话中的超级表情接龙状态，范围 15-1800 秒。",
+    "default": 180,
+    "slider": {
+      "min": 15,
+      "max": 1800,
+      "step": 15
+    }
   },
   "context_window_size": {
     "type": "int",
-    "description": "夜间语境学习为每个会话保留的近期消息数，范围 2-20",
-    "default": 8
+    "description": "学习上下文消息数",
+    "hint": "每个会话为夜间语境学习保留的近期消息数量，范围 2-20。",
+    "default": 8,
+    "slider": {
+      "min": 2,
+      "max": 20,
+      "step": 1
+    }
   },
   "learning_enabled": {
     "type": "bool",
-    "description": "启用不向会话输出消息的夜间语境学习任务",
+    "description": "启用夜间语境学习",
+    "hint": "在后台分析完整聊天语境，不向会话发送过程消息。",
     "default": true
   },
   "learning_time": {
     "type": "string",
-    "description": "夜间学习时间，使用 AstrBot 主机本地时区，格式 HH:MM",
-    "default": "03:30"
+    "description": "每日学习时间",
+    "hint": "使用 AstrBot 主机本地时区，格式为 HH:MM。示例：03:30",
+    "default": "03:30",
+    "condition": {
+      "learning_enabled": true
+    }
   },
   "learning_max_samples": {
     "type": "int",
-    "description": "每次夜间学习最多处理的新增样本数，范围 1-500",
-    "default": 100
+    "description": "单次学习样本上限",
+    "hint": "每次夜间任务最多处理的新增上下文样本数，范围 1-500。",
+    "default": 100,
+    "condition": {
+      "learning_enabled": true
+    },
+    "slider": {
+      "min": 1,
+      "max": 500,
+      "step": 10
+    }
   },
   "learning_retained_samples": {
     "type": "int",
-    "description": "本地最多保留的上下文样本行数，范围 200-50000",
-    "default": 5000
+    "description": "本地样本保留上限",
+    "hint": "本地最多保留的上下文样本行数，范围 200-50000。",
+    "default": 5000,
+    "condition": {
+      "learning_enabled": true
+    }
   },
   "learning_provider_id": {
     "type": "string",
-    "description": "夜间学习使用的 Provider ID；留空使用 AstrBot 当前默认 Provider",
-    "default": ""
+    "description": "学习模型 Provider",
+    "hint": "从 AstrBot 已配置的对话 Provider 中选择；留空时使用当前默认 Provider。",
+    "default": "",
+    "condition": {
+      "learning_enabled": true
+    },
+    "_special": "select_provider"
   },
   "learning_timeout_seconds": {
     "type": "int",
-    "description": "夜间学习单次模型调用超时秒数",
-    "default": 120
+    "description": "模型调用超时（秒）",
+    "hint": "夜间学习单次模型调用的最长等待时间。",
+    "default": 120,
+    "condition": {
+      "learning_enabled": true
+    }
   }
 }

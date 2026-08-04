@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import asyncio
+import json
+import urllib.error
+import urllib.request
 from typing import Any
 
 from astrbot.api.event import MessageChain
@@ -15,6 +19,87 @@ def _session_id(event: Any) -> str:
         return str(value)
     getter = getattr(event, "get_session_id", None)
     return str(getter() or "") if callable(getter) else ""
+
+
+def _native_endpoint(config: dict[str, Any] | None) -> str:
+    value = str((config or {}).get("napcat_extended_api_url", "") or "").strip()
+    return value.rstrip("/") + "/send" if value else ""
+
+
+def _native_request(
+    endpoint: str,
+    token: str,
+    payload: dict[str, Any],
+    timeout: float,
+) -> dict[str, Any] | None:
+    request = urllib.request.Request(
+        endpoint,
+        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        headers={"Content-Type": "application/json", **({"x-qqface-token": token} if token else {})},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            result = json.loads(response.read().decode("utf-8"))
+        if not isinstance(result, dict):
+            raise RuntimeError("NapCat native sender returned a non-object response")
+        if result.get("code", 0) != 0:
+            raise RuntimeError(str(result.get("message") or "request rejected"))
+        return result
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")[:500]
+        raise RuntimeError(f"HTTP {exc.code}: {detail}") from exc
+    except urllib.error.URLError:
+        return None
+
+
+async def _send_native_face(
+    event: Any,
+    record: FaceRecord,
+    *,
+    text: str,
+    result_id: str,
+    chain_count: int | None,
+    config: dict[str, Any] | None,
+) -> tuple[bool, str]:
+    endpoint = _native_endpoint(config)
+    if not endpoint:
+        return False, ""
+    group_id = str(event.get_group_id() or "")
+    sender_id = str(event.get_sender_id() or "")
+    if group_id.isdigit():
+        peer = {"type": "group", "id": group_id}
+    elif sender_id.isdigit():
+        peer = {"type": "private", "id": sender_id}
+    else:
+        return True, "NapCat 原生表情发送失败：当前事件缺少可路由的群号或用户号"
+    payload = {
+        "peer": peer,
+        "text": text,
+        "face": {
+            "face_id": record.id,
+            "face_type": record.face_type,
+            "face_text": record.literal_description or record.canonical_name,
+            "pack_id": record.pack_id,
+            "sticker_id": record.sticker_id,
+            "source_type": 1,
+            "sticker_type": record.sticker_type,
+            "result_id": result_id,
+            "chain_count": chain_count,
+        },
+    }
+    token = str((config or {}).get("napcat_extended_api_token", "") or "").strip()
+    try:
+        timeout = float((config or {}).get("napcat_extended_api_timeout_seconds", 8) or 8)
+    except (TypeError, ValueError):
+        timeout = 8.0
+    try:
+        result = await asyncio.to_thread(
+            _native_request, endpoint, token, payload, max(1.0, min(timeout, 30.0))
+        )
+    except Exception as exc:
+        return True, f"NapCat 原生表情发送失败：{exc}"
+    return (True, "") if result is not None else (False, "")
 
 
 async def _send_onebot_segments(event: Any, segments: list[dict[str, Any]]) -> None:
@@ -69,6 +154,7 @@ async def send_face(
     result_id: str = "",
     chain_count: int | str | None = None,
     chain_tracker: ChainStateTracker | None = None,
+    config: dict[str, Any] | None = None,
 ) -> str:
     if event.get_platform_name() != "aiocqhttp":
         return "发送失败：当前事件不是 aiocqhttp/OneBot 平台。"
@@ -142,6 +228,32 @@ async def send_face(
             )
             if effective_chain_count is None:
                 return f"发送失败：近期会话中没有可续接的 {record.chain_group} 接龙。"
+
+    native_required = bool(
+        record.face_kind in {"super", "random_super", "chain_super"}
+        or int(record.id) > 432
+    )
+    if native_required and _native_endpoint(config):
+        used, error = await _send_native_face(
+            event,
+            record,
+            text=clean_text,
+            result_id=clean_result_id,
+            chain_count=effective_chain_count,
+            config=config,
+        )
+        if used:
+            if error:
+                return error
+            if chain_tracker and record.face_kind == "chain_super":
+                chain_tracker.observe(_session_id(event), record, effective_chain_count)
+            event.set_extra("qqface.tool_sent", True)
+            details = [f"face_id={record.id}", effective_mode, "native=napcat"]
+            if clean_result_id:
+                details.append(f"resultId={clean_result_id}")
+            if parsed_chain_count is not None:
+                details.append(f"chainCount={parsed_chain_count}")
+            return f"已发送 QQ {record.canonical_name}（{'，'.join(details)}）。"
 
     uses_raw = (
         record.face_kind == "chain_super"
