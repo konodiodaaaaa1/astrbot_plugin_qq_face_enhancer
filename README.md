@@ -151,6 +151,8 @@ Get-ChildItem -LiteralPath $roots -Filter face_config.json -File -Recurse `
 
 白天插件仅在消息包含 QQ 表情时记录有限上下文，真实会话 ID 会先哈希。夜间任务调用配置的 Provider，对观察执行 `upsert`、`deprecate` 或 `delete`；官方 ID、名称和能力字段不能被学习任务修改。
 
+学习结果分为两层：`meaning`、`tone`、`usage_context`、`avoid_context` 必须是跨话题仍成立的通用规律；`case_context` 和 `case_evidence` 只保存去身份化的具体案例，案例主题不会参与检索排序。至少 3 个相互独立且模式一致的样本才会进入 `active`，单一话题或证据不足的观察会保留为 `pending_review`，避免把某个偶发话题（例如一次升学经历）误学成表情的固定含义。
+
 插件数据由 `StarTools.get_data_dir("astrbot_plugin_qq_face_enhancer")` 获取，典型文件包括：
 
 ```text

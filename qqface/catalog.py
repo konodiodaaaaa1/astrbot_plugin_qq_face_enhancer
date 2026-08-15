@@ -524,9 +524,14 @@ class FaceCatalog:
                 )
             ).lower()
             learned = " ".join(
-                str(item.get("meaning", ""))
+                str(value)
                 for item in self.observations.get(record.key, [])
                 if item.get("status") == "active"
+                for value in (
+                    item.get("meaning", ""),
+                    *(_as_strings(item.get("tone"))),
+                    item.get("usage_context", ""),
+                )
             ).lower()
             score = sum(
                 6
@@ -563,14 +568,26 @@ class FaceCatalog:
             evidence_count = int(observation.get("evidence_count", 1))
         except (TypeError, ValueError):
             confidence, evidence_count = 0.0, 1
+        try:
+            status = str(observation.get("status", "active")).strip().lower()
+        except (TypeError, ValueError):
+            status = "pending_review"
+        if status not in {"active", "pending_review", "deprecated"}:
+            status = "pending_review"
+        # A small evidence set is useful for audit, yet too weak for model-facing
+        # retrieval. Keep it visible as pending until independent evidence grows.
+        if evidence_count < 3 and status == "active":
+            status = "pending_review"
         clean = {
             "meaning": meaning,
             "tone": _as_strings(observation.get("tone")),
             "usage_context": str(observation.get("usage_context", "")).strip(),
             "avoid_context": str(observation.get("avoid_context", "")).strip(),
+            "case_context": str(observation.get("case_context", "")).strip()[:80],
+            "case_evidence": str(observation.get("case_evidence", "")).strip()[:240],
             "confidence": max(0.0, min(1.0, confidence)),
             "evidence_count": max(1, evidence_count),
-            "status": str(observation.get("status", "active")),
+            "status": status,
             "source": "nightly_learning",
             "updated_at": datetime.now().astimezone().isoformat(),
         }

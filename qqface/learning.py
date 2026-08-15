@@ -165,10 +165,18 @@ class LearningWorker:
         prompt = json.dumps(samples, ensure_ascii=False)
         system_prompt = (
             "你是 QQ 表情语境整理器。输入包含带具体 face_key、表情位置、随机结果和接龙信息的完整上下文窗口。"
-            "只记录跨场景仍有帮助的社交语义，也可以把高频无意义复读识别为一种使用模式。"
+            "请严格区分通用规律与具体案例：meaning、tone、usage_context、avoid_context 只能描述跨话题、"
+            "跨场景仍成立的表达功能；case_context、case_evidence 只记录本批样本中的一个去身份化案例，"
+            "用于解释证据，不能把案例主题当成表情固有含义。比如高考志愿、退档、某个账号、某个人名"
+            "只能放进 case_context/case_evidence，不能写入 meaning 或 usage_context。"
+            "至少需要 3 个相互独立的样本，且表达模式一致，才允许 status=active 的 upsert；"
+            "只有单一话题、单次出现或证据不足时，使用 status=pending_review，不得提升为通用语义。"
+            "避免复述原文中的姓名、QQ号、群名、链接、精确时间和其他可识别信息。"
             "不要修改 ID 或官方名称，不要仅凭一次样本过度推断。只输出 JSON 数组。"
             "每条字段：action(upsert/deprecate/delete), face_key, meaning, tone, usage_context, "
-            "avoid_context, confidence(0到1), evidence_count, status(active或pending_review)。"
+            "avoid_context, case_context, case_evidence, confidence(0到1), evidence_count, "
+            "status(active或pending_review)。meaning 是通用表达功能，usage_context 是通用场景；"
+            "case_context 不超过 80 字，case_evidence 不超过 240 字。"
             "deprecate/delete 必须精确填写已有 meaning；没有可靠更新时输出空数组。"
         )
         try:

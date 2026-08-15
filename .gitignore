@@ -3,3 +3,12 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 *.tmp
+context_samples.jsonl
+learning_state.json
+observations.json
+learning_audit.jsonl
+napcat_catalog.json
+observed_market_faces.json
+unknown_faces.json
+external_catalog.json
+napcat_companion/**/config.json
