@@ -23,7 +23,7 @@ from .qqface.parser import annotate_event
 from .qqface.sender import send_face
 
 PLUGIN_NAME = "astrbot_plugin_qq_face_enhancer"
-PLUGIN_VERSION = "1.2.1"
+PLUGIN_VERSION = "1.4.0"
 VALID_KINDS = set(FACE_KINDS.values())
 VALID_VISIBILITY = {"any", "hidden", "visible"}
 VALID_CHAIN_ROLES = {"", "start", "middle", "end"}
@@ -54,6 +54,9 @@ def _send_parameters(record: FaceRecord) -> dict[str, Any]:
         parameters["chain_action"] = ["auto"]
         parameters["result_id"] = "可选；传入后原样作为 OneBot face.data.resultId"
         parameters["chain_count"] = "仅 chain_super 支持"
+    variants = record.send_payload.get("variants", [])
+    if isinstance(variants, list) and variants:
+        parameters["variant"] = [str(item) for item in variants]
     return parameters
 
 
@@ -62,6 +65,7 @@ def _record_capabilities(catalog: FaceCatalog, record: FaceRecord) -> dict[str, 
     return {
         "face_id": record.id,
         "name": record.canonical_name,
+        "aliases": record.aliases,
         "family": record.family,
         "kind": record.face_kind,
         "hidden": record.hidden,
@@ -134,6 +138,7 @@ def _capability_summary(
             "text": "mixed 模式下的同条文字",
             "result_id": "可选字符串，原样透传到 face.data.resultId",
             "chain_count": "可选正整数；仅 chain_super 生效，覆盖自动状态",
+            "variant": "可选；必须来自 search_qq_face 返回的精确特殊变体",
         },
     }
 
@@ -282,6 +287,7 @@ class QQFaceEnhancer(Star):
         chain_action: str = "auto",
         result_id: str = "",
         chain_count: int | str | None = None,
+        variant: str = "",
         reason: str = "",
     ) -> str:
         """Send one validated QQ face to the current OneBot conversation.
@@ -294,6 +300,7 @@ class QQFaceEnhancer(Star):
             chain_action(string): auto、start 或 continue；续接必须匹配近期会话状态。
             result_id(string): 可选，显式指定 OneBot face.data.resultId；不传则由 QQ 产生或省略。
             chain_count(number): 可选正整数；chain_super 传入后覆盖会话状态，直接指定接龙次数。
+            variant(string): 可选；必须来自 search_qq_face 返回值，用于目录中已确认的特殊隐藏状态。
             reason(string): 可选，说明选择该表情的语境，不会发送给用户。
         """
         _ = reason
@@ -311,6 +318,7 @@ class QQFaceEnhancer(Star):
             chain_action=chain_action,
             result_id=result_id,
             chain_count=chain_count,
+            variant=variant,
             chain_tracker=self.chain_tracker,
             config=self.config,
         )

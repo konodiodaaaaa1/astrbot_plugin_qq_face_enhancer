@@ -27,11 +27,12 @@ description: 理解、检索并安全发送 OneBot QQ 官方表情
 1. 结合标识前后的完整文字判断社交语气，不能只按官方名称作字面解释。
 2. 需要候选或更详细语义时调用 `search_qq_face`，不要凭记忆猜 `face_id`。可使用 `kind`、`hidden` 和 `chain_role` 精确筛选。
 3. 发送前确认候选的 `sendable=true`，再调用 `send_qq_face`。
-4. 超级表情通常使用 `send_mode=auto`，插件会默认单独发送；只有确实需要同条文字时才显式使用 `mixed`。
-5. 骰子和包剪锤默认由 QQ 产生结果；如果语境明确要求指定结果，可将目标结果作为 `result_id` 传给 `send_qq_face`，不要使用 `dice/rps.result` 形式猜测映射。
-6. 接龙默认按会话状态续接；如果语境明确要求 Bot 直接控制接龙次数，将正整数作为 `chain_count` 传给 `send_qq_face`，它会覆盖会话状态并允许直接发送中段/收尾。未传 `chain_count` 时仍使用原有状态校验。
-7. `result_id` 是可选原始 OneBot 字段，传入后原样透传；`chain_count` 仅对 `chain_super` 生效，必须是正整数。两个参数都不传时保持默认行为。
-8. `market_face/mface` 目前只支持理解和学习，不能作为普通 `system_face` 发送。
+4. 如果候选返回 `send_parameters.variant`，原样传给 `send_qq_face`。例如“七彩祥龙”使用 `face_id=394` 和 `variant=rainbow_dragon_2024`，私聊、群聊调用方式相同。
+5. 超级表情通常使用 `send_mode=auto`，插件会默认单独发送；只有确实需要同条文字时才显式使用 `mixed`。
+6. 骰子和包剪锤默认由 QQ 产生结果；如果语境明确要求指定结果，可将目标结果作为 `result_id` 传给 `send_qq_face`，不要使用 `dice/rps.result` 形式猜测映射。
+7. 接龙默认按会话状态续接；如果语境明确要求 Bot 直接控制接龙次数，将正整数作为 `chain_count` 传给 `send_qq_face`，它会覆盖会话状态并允许直接发送中段/收尾。未传 `chain_count` 时仍使用原有状态校验。
+8. `result_id` 是可选原始 OneBot 字段，传入后原样透传；`chain_count` 仅对 `chain_super` 生效，必须是正整数。两个参数都不传时保持默认行为。
+9. `market_face/mface` 目前只支持理解和学习，不能作为普通 `system_face` 发送。
 
 需要了解特殊分类或参数时调用 `describe_qq_face_capabilities`：
 

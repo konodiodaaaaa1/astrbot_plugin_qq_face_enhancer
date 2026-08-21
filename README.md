@@ -12,6 +12,7 @@
 - 从原始 OneBot 事件保留 `resultId`、`chainCount`、`faceType` 和 NapCat `raw` 表情元素。
 - 识别 `mface` 商城表情并保留包 ID、表情 ID 和摘要；首次收到时以不可发送记录落盘，供检索和夜间学习使用。为防止错发，1.0.0 暂不发送 `mface`。
 - 提供 `search_qq_face` 和 `send_qq_face` 模型工具。
+- “七彩祥龙”作为隐藏表情目录能力返回，通过 `send_qq_face(face_id="394", variant="rainbow_dragon_2024")` 播放 2024 完整竖向动画，支持私聊和群聊。
 - 骰子和包剪锤默认使用 NapCat 专用随机消息段；传入 `result_id` 时改用 `face` 段显式写入 `resultId`。
 - 接龙中段/收尾默认匹配近期同一会话状态；传入正整数 `chain_count` 时可直接指定接龙次数。
 - 支持从本机 NapCat `face_config.json` 校验、比较并原子更新运行目录。
@@ -141,6 +142,7 @@ Get-ChildItem -LiteralPath $roots -Filter face_config.json -File -Recurse `
 - 超级表情在 `send_mode=auto` 下默认单独发送。
 - `send_qq_face` 的 `result_id` 可选传入并原样写入 `face.data.resultId`；不传时由 QQ 产生或省略。
 - `send_qq_face` 的 `chain_count` 可选传入正整数；对接龙表情会覆盖会话状态，直接指定接龙次数；不传时保持自动续接校验。
+- `send_qq_face` 的 `variant` 必须来自 `search_qq_face` 返回值；“七彩祥龙”使用 `rainbow_dragon_2024`，发送失败时不会回退成普通龙或扁龙。
 - `send_mode=mixed` 必须显式提供同条发送的 `text`。
 - 骰子 `358` 和包剪锤 `359` 默认使用随机段，结果由 QQ 客户端/协议端生成；传 `result_id` 时改用 `face.data.resultId` 显式控制。
 - 篮球 `114` 作为随机超级表情按官方 `face` 段发送。
@@ -197,3 +199,7 @@ plugin，直接调用 NapCat `core.apis.MsgApi.sendMsg`，保留动画包、随�
 companion 不可达时才回退标准 OneBot。当前 NapCat 运行时没有内置动态
 `BaseEmojiService`，所以想自动拉取客户端新增目录仍建议升级 NapCat；升级
 不是使用已知 `face_config` 元数据进行原生发送的前置条件。
+
+companion 0.2.0 还提供固定的 `rainbow_dragon_2024` 特殊效果。AstrBot 会从
+当前事件自动选择私聊 UID 或群号路由；该效果只接受目录中声明的固定变体，
+不接受调用方提供原始 protobuf 数据。

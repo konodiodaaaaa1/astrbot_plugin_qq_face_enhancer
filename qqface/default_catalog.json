@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "catalog_version": "2026-08-03-napcat",
+  "catalog_version": "2026-08-21-rainbow-dragon",
   "source": "NapCatQQ/NapCatQQ face_config.json (normalized subset)",
   "source_revision": "5ee11502773e0426bfdeb22e9d2b28559d157295",
   "source_path": "packages/napcat-core/external/face_config.json",
@@ -9259,10 +9259,24 @@
       "id": "394",
       "canonical_name": "新年大龙",
       "literal_description": "新年大龙",
-      "aliases": [],
-      "social_meanings": [],
-      "tone": [],
-      "usage_contexts": [],
+      "aliases": [
+        "七彩祥龙",
+        "完整七彩祥龙",
+        "完整七彩龙",
+        "七彩龙",
+        "2024龙年隐藏彩蛋"
+      ],
+      "social_meanings": [
+        "龙年祝福",
+        "稀有隐藏彩蛋"
+      ],
+      "tone": [
+        "喜庆",
+        "惊喜"
+      ],
+      "usage_contexts": [
+        "发送2024龙年七彩祥龙完整动画"
+      ],
       "avoid_contexts": [],
       "face_kind": "chain_super",
       "face_type": 3,
@@ -9280,7 +9294,10 @@
         "type": "face",
         "data": {
           "id": "394"
-        }
+        },
+        "variants": [
+          "rainbow_dragon_2024"
+        ]
       },
       "source": "napcat_normalized_snapshot",
       "source_revision": "5ee11502773e0426bfdeb22e9d2b28559d157295",

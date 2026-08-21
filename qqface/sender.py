@@ -12,6 +12,8 @@ from astrbot.api.message_components import Face, Plain
 from .catalog import FaceCatalog, FaceRecord
 from .chain import ChainStateTracker
 
+RAINBOW_DRAGON_VARIANT = "rainbow_dragon_2024"
+
 
 def _session_id(event: Any) -> str:
     value = getattr(event, "unified_msg_origin", "")
@@ -21,9 +23,19 @@ def _session_id(event: Any) -> str:
     return str(getter() or "") if callable(getter) else ""
 
 
-def _native_endpoint(config: dict[str, Any] | None) -> str:
+def _native_endpoint(config: dict[str, Any] | None, route: str = "send") -> str:
     value = str((config or {}).get("napcat_extended_api_url", "") or "").strip()
-    return value.rstrip("/") + "/send" if value else ""
+    return value.rstrip("/") + f"/{route}" if value else ""
+
+
+def _event_peer(event: Any) -> dict[str, str] | None:
+    group_id = str(event.get_group_id() or "")
+    sender_id = str(event.get_sender_id() or "")
+    if group_id.isdigit() and group_id != "0":
+        return {"type": "group", "id": group_id}
+    if sender_id.isdigit() and sender_id != "0":
+        return {"type": "private", "id": sender_id}
+    return None
 
 
 def _native_request(
@@ -65,13 +77,8 @@ async def _send_native_face(
     endpoint = _native_endpoint(config)
     if not endpoint:
         return False, ""
-    group_id = str(event.get_group_id() or "")
-    sender_id = str(event.get_sender_id() or "")
-    if group_id.isdigit():
-        peer = {"type": "group", "id": group_id}
-    elif sender_id.isdigit():
-        peer = {"type": "private", "id": sender_id}
-    else:
+    peer = _event_peer(event)
+    if peer is None:
         return True, "NapCat 原生表情发送失败：当前事件缺少可路由的群号或用户号"
     payload = {
         "peer": peer,
@@ -100,6 +107,35 @@ async def _send_native_face(
     except Exception as exc:
         return True, f"NapCat 原生表情发送失败：{exc}"
     return (True, "") if result is not None else (False, "")
+
+
+async def _send_native_special(
+    event: Any,
+    effect: str,
+    config: dict[str, Any] | None,
+) -> tuple[bool, str, dict[str, Any]]:
+    endpoint = _native_endpoint(config, "send-special")
+    if not endpoint:
+        return False, "NapCat 特殊表情接口未配置。", {}
+    peer = _event_peer(event)
+    if peer is None:
+        return False, "当前事件缺少可路由的群号或用户号。", {}
+    payload = {"effect": effect, "peer": peer}
+    token = str((config or {}).get("napcat_extended_api_token", "") or "").strip()
+    try:
+        timeout = float((config or {}).get("napcat_extended_api_timeout_seconds", 8) or 8)
+    except (TypeError, ValueError):
+        timeout = 8.0
+    try:
+        result = await asyncio.to_thread(
+            _native_request, endpoint, token, payload, max(1.0, min(timeout, 30.0))
+        )
+    except Exception as exc:
+        return False, f"NapCat 特殊表情发送失败：{exc}", {}
+    if result is None:
+        return False, "NapCat 特殊表情接口不可达。", {}
+    data = result.get("data") if isinstance(result.get("data"), dict) else {}
+    return True, "", data
 
 
 async def _send_onebot_segments(event: Any, segments: list[dict[str, Any]]) -> None:
@@ -153,6 +189,7 @@ async def send_face(
     chain_action: str = "auto",
     result_id: str = "",
     chain_count: int | str | None = None,
+    variant: str = "",
     chain_tracker: ChainStateTracker | None = None,
     config: dict[str, Any] | None = None,
 ) -> str:
@@ -173,6 +210,27 @@ async def send_face(
         return "发送失败：send_mode 只能是 auto、standalone 或 mixed。"
     if chain_action not in {"auto", "start", "continue"}:
         return "发送失败：chain_action 只能是 auto、start 或 continue。"
+
+    clean_variant = str(variant or "").strip()
+    variants = record.send_payload.get("variants", [])
+    available_variants = {
+        str(item).strip() for item in variants if str(item).strip()
+    } if isinstance(variants, list) else set()
+    if clean_variant and clean_variant not in available_variants:
+        return f"发送失败：表情 {record.canonical_name} 不支持 variant={clean_variant}。"
+    if clean_variant:
+        sent, error, data = await _send_native_special(
+            event, clean_variant, config
+        )
+        if not sent:
+            return f"发送失败：{error}"
+        event.set_extra("qqface.tool_sent", True)
+        sequence = str(data.get("message_seq") or "")
+        detail = f"，message_seq={sequence}" if sequence else ""
+        return (
+            f"已发送 QQ 隐藏表情：七彩祥龙（face_id={record.id}，"
+            f"variant={clean_variant}{detail}）。"
+        )
 
     raw_result_id = "" if result_id is None else str(result_id)
     if len(raw_result_id) > 128 or any(ord(char) < 32 for char in raw_result_id):

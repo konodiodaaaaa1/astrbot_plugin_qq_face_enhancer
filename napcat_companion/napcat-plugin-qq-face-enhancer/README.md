@@ -24,3 +24,8 @@ napcat_extended_api_token=<the same token>
 The companion calls `core.apis.MsgApi.sendMsg` with a native `faceElement`, so
 extended, super, random, and chain faces are not limited by OneBot's static
 `sysface` allow-list.
+
+Version 0.2.0 also exposes `POST /send-special` for the fixed
+`rainbow_dragon_2024` effect. It supports private and group peers and builds the
+verified QQ packet internally. Callers provide only the effect name and peer;
+arbitrary packet data is not accepted.
