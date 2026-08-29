@@ -13,6 +13,7 @@ from .catalog import FaceCatalog, FaceRecord
 from .chain import ChainStateTracker
 
 RAINBOW_DRAGON_VARIANT = "rainbow_dragon_2024"
+STRICT_NATIVE_FACE_IDS = {"485", "486", "487", "488", "489", "490", "491", "492", "493"}
 
 
 def _session_id(event: Any) -> str:
@@ -212,12 +213,6 @@ async def send_face(
         return "发送失败：chain_action 只能是 auto、start 或 continue。"
 
     wire_record = record
-    hidden_trigger = record.send_payload.get("hidden_trigger")
-    if isinstance(hidden_trigger, dict):
-        trigger_id = str(hidden_trigger.get("face_id", "")).strip()
-        trigger_record = catalog.get(trigger_id, family) if trigger_id else None
-        if trigger_record and trigger_record.face_kind == "chain_super":
-            wire_record = trigger_record
 
     clean_variant = str(variant or "").strip()
     variants = record.send_payload.get("variants", [])
@@ -244,11 +239,15 @@ async def send_face(
     if len(raw_result_id) > 128 or any(ord(char) < 32 for char in raw_result_id):
         return "发送失败：result_id 必须是不超过 128 个字符的单行字符串。"
     clean_result_id = raw_result_id.strip()
+    if not clean_result_id:
+        default_result_id = record.send_payload.get("default_result_id")
+        if default_result_id is not None:
+            clean_result_id = str(default_result_id).strip()
 
     explicit_chain_count = chain_count not in (None, "")
     parsed_chain_count: int | None = None
     if explicit_chain_count:
-        if record.face_kind != "chain_super" and wire_record.face_kind != "chain_super":
+        if record.face_kind != "chain_super":
             return "发送失败：chain_count 仅适用于接龙超级表情（chain_super）。"
         raw_chain_count = str(chain_count).strip()
         if not raw_chain_count or any(
@@ -273,16 +272,13 @@ async def send_face(
         clean_text = ""
 
     effective_chain_count: int | None = None
-    if wire_record is not record:
-        if not clean_result_id:
-            clean_result_id = str(hidden_trigger.get("result_id", "1"))
-        effective_chain_count = parsed_chain_count
-        if effective_chain_count is None:
-            try:
-                effective_chain_count = int(hidden_trigger.get("chain_count", 3))
-            except (TypeError, ValueError):
-                effective_chain_count = 3
-    elif record.face_kind == "chain_super":
+    default_chain_count = record.send_payload.get("default_chain_count")
+    if default_chain_count is not None:
+        try:
+            effective_chain_count = int(default_chain_count)
+        except (TypeError, ValueError):
+            effective_chain_count = None
+    if record.face_kind == "chain_super":
         if parsed_chain_count is not None:
             if record.chain_role == "start" and chain_action == "continue":
                 return "发送失败：接龙起点不能作为续接表情发送。"
@@ -308,6 +304,9 @@ async def send_face(
         wire_record.face_kind in {"super", "random_super", "chain_super"}
         or int(wire_record.id) > 432
     )
+    strict_native = record.id in STRICT_NATIVE_FACE_IDS
+    if strict_native and not _native_endpoint(config):
+        return "发送失败：开学季表情必须通过 NapCat 原生接口发送。"
     if native_required and _native_endpoint(config):
         used, error = await _send_native_face(
             event,
@@ -328,9 +327,9 @@ async def send_face(
                 details.append(f"resultId={clean_result_id}")
             if parsed_chain_count is not None:
                 details.append(f"chainCount={parsed_chain_count}")
-            if wire_record is not record:
-                details.append(f"triggerId={wire_record.id}")
             return f"已发送 QQ {record.canonical_name}（{'，'.join(details)}）。"
+        if strict_native:
+            return "发送失败：NapCat 原生接口未返回成功结果，已停止普通表情回退。"
 
     uses_raw = (
         wire_record.face_kind == "chain_super"
@@ -370,6 +369,4 @@ async def send_face(
         details.append(f"resultId={clean_result_id}")
     if parsed_chain_count is not None:
         details.append(f"chainCount={parsed_chain_count}")
-    if wire_record is not record:
-        details.append(f"triggerId={wire_record.id}")
     return f"已发送 QQ {kind_label}：{record.canonical_name}（{'，'.join(details)}）。"

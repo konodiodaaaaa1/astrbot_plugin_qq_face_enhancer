@@ -60,6 +60,12 @@ def _send_parameters(record: FaceRecord) -> dict[str, Any]:
     hidden_trigger = record.send_payload.get("hidden_trigger")
     if isinstance(hidden_trigger, dict):
         parameters["hidden_trigger"] = dict(hidden_trigger)
+    default_result_id = record.send_payload.get("default_result_id")
+    if default_result_id is not None:
+        parameters["default_result_id"] = str(default_result_id)
+    default_chain_count = record.send_payload.get("default_chain_count")
+    if default_chain_count is not None:
+        parameters["default_chain_count"] = int(default_chain_count)
     return parameters
 
 

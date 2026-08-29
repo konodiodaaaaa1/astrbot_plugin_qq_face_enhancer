@@ -10725,11 +10725,8 @@
         "data": {
           "id": "488"
         },
-        "hidden_trigger": {
-          "face_id": "487",
-          "result_id": "1",
-          "chain_count": 3
-        }
+        "default_result_id": "1",
+        "default_chain_count": 3
       }
     },
     {
