@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "catalog_version": "2026-08-21-rainbow-dragon",
+  "catalog_version": "2026-08-29-school-season",
   "source": "NapCatQQ/NapCatQQ face_config.json (normalized subset)",
-  "source_revision": "5ee11502773e0426bfdeb22e9d2b28559d157295",
+  "source_revision": "qq-9.3.50-2026-08-29",
   "source_path": "packages/napcat-core/external/face_config.json",
   "license": "licenses/NAPCAT-LICENSE.txt",
   "faces": [
@@ -10563,6 +10563,335 @@
       "source_revision": "5ee11502773e0426bfdeb22e9d2b28559d157295",
       "confidence": 0.95,
       "updated_at": "2026-08-03"
+    },
+    {
+      "protocol": "onebot_v11",
+      "adapter": "aiocqhttp",
+      "family": "system_face",
+      "aliases": [
+        "开学接龙"
+      ],
+      "social_meanings": [],
+      "tone": [],
+      "usage_contexts": [],
+      "avoid_contexts": [],
+      "sendable": true,
+      "source": "qq_9.3.50_school_season",
+      "source_revision": "qq-9.3.50-2026-08-29",
+      "confidence": 0.98,
+      "updated_at": "2026-08-29",
+      "id": "485",
+      "canonical_name": "开学啦",
+      "literal_description": "开学啦",
+      "face_kind": "chain_super",
+      "face_type": 3,
+      "sticker_type": 3,
+      "pack_id": "1",
+      "pack_name": "开学季限时表情8.27-9.14",
+      "sticker_id": "87",
+      "em_code": "10485",
+      "hidden": false,
+      "standalone_preferred": true,
+      "chain_group": "school_2026",
+      "chain_role": "start",
+      "send_payload": {
+        "type": "face",
+        "data": {
+          "id": "485"
+        }
+      }
+    },
+    {
+      "protocol": "onebot_v11",
+      "adapter": "aiocqhttp",
+      "family": "system_face",
+      "aliases": [
+        "开学中段"
+      ],
+      "social_meanings": [],
+      "tone": [],
+      "usage_contexts": [],
+      "avoid_contexts": [],
+      "sendable": true,
+      "source": "qq_9.3.50_school_season",
+      "source_revision": "qq-9.3.50-2026-08-29",
+      "confidence": 0.98,
+      "updated_at": "2026-08-29",
+      "id": "486",
+      "canonical_name": "开学接龙中段",
+      "literal_description": "开学接龙中段",
+      "face_kind": "chain_super",
+      "face_type": 3,
+      "sticker_type": 3,
+      "pack_id": "1",
+      "pack_name": "开学季限时表情8.27-9.14",
+      "sticker_id": "88",
+      "em_code": "10486",
+      "hidden": true,
+      "standalone_preferred": true,
+      "chain_group": "school_2026",
+      "chain_role": "middle",
+      "send_payload": {
+        "type": "face",
+        "data": {
+          "id": "486"
+        }
+      }
+    },
+    {
+      "protocol": "onebot_v11",
+      "adapter": "aiocqhttp",
+      "family": "system_face",
+      "aliases": [
+        "开学终段"
+      ],
+      "social_meanings": [],
+      "tone": [],
+      "usage_contexts": [],
+      "avoid_contexts": [],
+      "sendable": true,
+      "source": "qq_9.3.50_school_season",
+      "source_revision": "qq-9.3.50-2026-08-29",
+      "confidence": 0.98,
+      "updated_at": "2026-08-29",
+      "id": "487",
+      "canonical_name": "开学接龙终段",
+      "literal_description": "开学接龙终段",
+      "face_kind": "chain_super",
+      "face_type": 3,
+      "sticker_type": 3,
+      "pack_id": "1",
+      "pack_name": "开学季限时表情8.27-9.14",
+      "sticker_id": "89",
+      "em_code": "10487",
+      "hidden": true,
+      "standalone_preferred": true,
+      "chain_group": "school_2026",
+      "chain_role": "end",
+      "send_payload": {
+        "type": "face",
+        "data": {
+          "id": "487"
+        }
+      }
+    },
+    {
+      "protocol": "onebot_v11",
+      "adapter": "aiocqhttp",
+      "family": "system_face",
+      "aliases": [
+        "开学隐藏表情"
+      ],
+      "social_meanings": [],
+      "tone": [],
+      "usage_contexts": [],
+      "avoid_contexts": [],
+      "sendable": true,
+      "source": "qq_9.3.50_school_season",
+      "source_revision": "qq-9.3.50-2026-08-29",
+      "confidence": 0.98,
+      "updated_at": "2026-08-29",
+      "id": "488",
+      "canonical_name": "开学大吉",
+      "literal_description": "开学大吉",
+      "face_kind": "super",
+      "face_type": 3,
+      "sticker_type": 1,
+      "pack_id": "1",
+      "pack_name": "开学季限时表情8.27-9.14",
+      "sticker_id": "90",
+      "em_code": "10488",
+      "hidden": true,
+      "standalone_preferred": true,
+      "chain_group": "",
+      "chain_role": "",
+      "send_payload": {
+        "type": "face",
+        "data": {
+          "id": "488"
+        }
+      }
+    },
+    {
+      "protocol": "onebot_v11",
+      "adapter": "aiocqhttp",
+      "family": "system_face",
+      "aliases": [
+        "学习表情"
+      ],
+      "social_meanings": [],
+      "tone": [],
+      "usage_contexts": [],
+      "avoid_contexts": [],
+      "sendable": true,
+      "source": "qq_9.3.50_school_season",
+      "source_revision": "qq-9.3.50-2026-08-29",
+      "confidence": 0.98,
+      "updated_at": "2026-08-29",
+      "id": "489",
+      "canonical_name": "知识增加",
+      "literal_description": "知识增加",
+      "face_kind": "super",
+      "face_type": 3,
+      "sticker_type": 1,
+      "pack_id": "4",
+      "pack_name": "开学季限时表情8.27-9.14",
+      "sticker_id": "91",
+      "em_code": "10489",
+      "hidden": false,
+      "standalone_preferred": true,
+      "chain_group": "",
+      "chain_role": "",
+      "send_payload": {
+        "type": "face",
+        "data": {
+          "id": "489"
+        }
+      }
+    },
+    {
+      "protocol": "onebot_v11",
+      "adapter": "aiocqhttp",
+      "family": "system_face",
+      "aliases": [],
+      "social_meanings": [],
+      "tone": [],
+      "usage_contexts": [],
+      "avoid_contexts": [],
+      "sendable": true,
+      "source": "qq_9.3.50_school_season",
+      "source_revision": "qq-9.3.50-2026-08-29",
+      "confidence": 0.98,
+      "updated_at": "2026-08-29",
+      "id": "490",
+      "canonical_name": "能送我吗",
+      "literal_description": "能送我吗",
+      "face_kind": "super",
+      "face_type": 3,
+      "sticker_type": 1,
+      "pack_id": "4",
+      "pack_name": "开学季限时表情8.27-9.14",
+      "sticker_id": "92",
+      "em_code": "10490",
+      "hidden": false,
+      "standalone_preferred": true,
+      "chain_group": "",
+      "chain_role": "",
+      "send_payload": {
+        "type": "face",
+        "data": {
+          "id": "490"
+        }
+      }
+    },
+    {
+      "protocol": "onebot_v11",
+      "adapter": "aiocqhttp",
+      "family": "system_face",
+      "aliases": [
+        "学霸"
+      ],
+      "social_meanings": [],
+      "tone": [],
+      "usage_contexts": [],
+      "avoid_contexts": [],
+      "sendable": true,
+      "source": "qq_9.3.50_school_season",
+      "source_revision": "qq-9.3.50-2026-08-29",
+      "confidence": 0.98,
+      "updated_at": "2026-08-29",
+      "id": "491",
+      "canonical_name": "自信学霸",
+      "literal_description": "自信学霸",
+      "face_kind": "super",
+      "face_type": 3,
+      "sticker_type": 1,
+      "pack_id": "4",
+      "pack_name": "开学季限时表情8.27-9.14",
+      "sticker_id": "93",
+      "em_code": "10491",
+      "hidden": false,
+      "standalone_preferred": true,
+      "chain_group": "",
+      "chain_role": "",
+      "send_payload": {
+        "type": "face",
+        "data": {
+          "id": "491"
+        }
+      }
+    },
+    {
+      "protocol": "onebot_v11",
+      "adapter": "aiocqhttp",
+      "family": "system_face",
+      "aliases": [],
+      "social_meanings": [],
+      "tone": [],
+      "usage_contexts": [],
+      "avoid_contexts": [],
+      "sendable": true,
+      "source": "qq_9.3.50_school_season",
+      "source_revision": "qq-9.3.50-2026-08-29",
+      "confidence": 0.98,
+      "updated_at": "2026-08-29",
+      "id": "492",
+      "canonical_name": "让我细品",
+      "literal_description": "让我细品",
+      "face_kind": "super",
+      "face_type": 3,
+      "sticker_type": 1,
+      "pack_id": "4",
+      "pack_name": "开学季限时表情8.27-9.14",
+      "sticker_id": "94",
+      "em_code": "10492",
+      "hidden": false,
+      "standalone_preferred": true,
+      "chain_group": "",
+      "chain_role": "",
+      "send_payload": {
+        "type": "face",
+        "data": {
+          "id": "492"
+        }
+      }
+    },
+    {
+      "protocol": "onebot_v11",
+      "adapter": "aiocqhttp",
+      "family": "system_face",
+      "aliases": [
+        "早八"
+      ],
+      "social_meanings": [],
+      "tone": [],
+      "usage_contexts": [],
+      "avoid_contexts": [],
+      "sendable": true,
+      "source": "qq_9.3.50_school_season",
+      "source_revision": "qq-9.3.50-2026-08-29",
+      "confidence": 0.98,
+      "updated_at": "2026-08-29",
+      "id": "493",
+      "canonical_name": "又是早八",
+      "literal_description": "又是早八",
+      "face_kind": "super",
+      "face_type": 3,
+      "sticker_type": 1,
+      "pack_id": "4",
+      "pack_name": "开学季限时表情8.27-9.14",
+      "sticker_id": "95",
+      "em_code": "10493",
+      "hidden": false,
+      "standalone_preferred": true,
+      "chain_group": "",
+      "chain_role": "",
+      "send_payload": {
+        "type": "face",
+        "data": {
+          "id": "493"
+        }
+      }
     }
   ]
 }

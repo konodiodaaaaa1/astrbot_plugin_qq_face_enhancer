@@ -39,6 +39,9 @@ CHAIN_GROUPS = {
     "429": ("snake_2025", "start"),
     "430": ("snake_2025", "middle"),
     "431": ("snake_2025", "end"),
+    "485": ("school_2026", "start"),
+    "486": ("school_2026", "middle"),
+    "487": ("school_2026", "end"),
 }
 
 

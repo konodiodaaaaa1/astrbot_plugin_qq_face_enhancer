@@ -6,13 +6,14 @@
 
 ## 功能
 
-- 内置 296 条 QQ/NapCat `sysface` 规范化快照，可离线识别全部当前系统表情。
+- 内置 305 条 QQ/NapCat `sysface` 规范化快照，可离线识别全部当前系统表情。
 - 区分 194 条普通表情、87 条超级表情、3 条随机超级表情和 12 条接龙超级表情。
 - 区分表情单独发送与表情加文字/其他消息段的混合发送。
 - 从原始 OneBot 事件保留 `resultId`、`chainCount`、`faceType` 和 NapCat `raw` 表情元素。
 - 识别 `mface` 商城表情并保留包 ID、表情 ID 和摘要；首次收到时以不可发送记录落盘，供检索和夜间学习使用。为防止错发，1.0.0 暂不发送 `mface`。
 - 提供 `search_qq_face` 和 `send_qq_face` 模型工具。
 - “七彩祥龙”作为隐藏表情目录能力返回，通过 `send_qq_face(face_id="394", variant="rainbow_dragon_2024")` 播放 2024 完整竖向动画，支持私聊和群聊。
+- 收录 2026 开学季表情：`485/486/487` 为开学接龙状态，`488` 为开学大吉，`489-493` 为开学季超级表情。
 - 骰子和包剪锤默认使用 NapCat 专用随机消息段；传入 `result_id` 时改用 `face` 段显式写入 `resultId`。
 - 接龙中段/收尾默认匹配近期同一会话状态；传入正整数 `chain_count` 时可直接指定接龙次数。
 - 支持从本机 NapCat `face_config.json` 校验、比较并原子更新运行目录。
@@ -172,7 +173,7 @@ unknown_faces.json
 ## 故障排查
 
 - 报错 `get_data_dir`：确认安装的是 1.0.0 或更高版本 ZIP，`main.py` 应使用 `StarTools.get_data_dir(...)`。
-- 目录仍不是 296 条：执行 `/qqface status`，确认没有错误的外部目录覆盖；再执行 `/qqface reload`。
+- 目录仍不是 305 条：执行 `/qqface status`，确认没有错误的外部目录覆盖；再执行 `/qqface reload`。
 - NapCat 同步失败：确认填写的是文件而不是目录，并确认 JSON 中存在 `sysface` 数组。
 - 能检索但不能发送：检查 `allow_send=true`，并确认当前事件平台为 `aiocqhttp`。
 - 夜间学习没有记录：需要先在真实会话收到包含 `face`/`mface` 的消息，并配置可用 Provider。
