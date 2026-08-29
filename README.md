@@ -144,8 +144,7 @@ Get-ChildItem -LiteralPath $roots -Filter face_config.json -File -Recurse `
 - `send_qq_face` 的 `result_id` 可选传入并原样写入 `face.data.resultId`；不传时由 QQ 产生或省略。
 - `send_qq_face` 的 `chain_count` 可选传入正整数；对接龙表情会覆盖会话状态，直接指定接龙次数；不传时保持自动续接校验。
 - 具有关联接龙彩蛋的隐藏表情会按目录中的 `hidden_trigger` 自动发送对应终段和 `resultId`，避免显示扁平本体。
-- 开学大吉 `488` 默认携带 `resultId=1`，保留 QQ 客户端隐藏动画触发条件。
-- 开学大吉 `488` 同时携带 `chainCount=3`，让手机端进入完整接龙动画渲染。
+- 开学大吉 `488` 调用时自动复用开学接龙终段 `487`，携带 `resultId=1` 和 `chainCount=3`，让移动端进入完整隐藏动画渲染。
 - `send_qq_face` 的 `variant` 必须来自 `search_qq_face` 返回值；“七彩祥龙”使用 `rainbow_dragon_2024`，发送失败时不会回退成普通龙或扁龙。
 - `send_mode=mixed` 必须显式提供同条发送的 `text`。
 - 骰子 `358` 和包剪锤 `359` 默认使用随机段，结果由 QQ 客户端/协议端生成；传 `result_id` 时改用 `face.data.resultId` 显式控制。

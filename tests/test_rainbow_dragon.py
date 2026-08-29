@@ -70,7 +70,7 @@ def test_rainbow_dragon_uses_the_same_tool_for_private_and_group(tmp_path, monke
     }
 
 
-def test_school_hidden_face_uses_own_animated_payload(tmp_path, monkeypatch):
+def test_school_hidden_face_uses_chain_end_trigger(tmp_path, monkeypatch):
     catalog = FaceCatalog(tmp_path)
     calls = []
 
@@ -87,15 +87,15 @@ def test_school_hidden_face_uses_own_animated_payload(tmp_path, monkeypatch):
         sender.send_face(event=Event(), catalog=catalog, face_id="488", config=config)
     )
 
-    assert "face_id=488" in result
+    assert "triggerId=487" in result
     assert calls[0]["face"] == {
-        "face_id": "488",
+        "face_id": "487",
         "face_type": 3,
-        "face_text": "开学大吉",
+        "face_text": "开学接龙终段",
         "pack_id": "1",
-        "sticker_id": "90",
+        "sticker_id": "89",
         "source_type": 1,
-        "sticker_type": 1,
+        "sticker_type": 3,
         "result_id": "1",
         "chain_count": 3,
     }

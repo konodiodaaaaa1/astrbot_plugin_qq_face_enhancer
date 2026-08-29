@@ -544,7 +544,7 @@
       },
       "source": "napcat_normalized_snapshot",
       "source_revision": "5ee11502773e0426bfdeb22e9d2b28559d157295",
-      "confidence": 1.0,
+      "confidence": 1,
       "updated_at": "2026-08-03"
     },
     {
@@ -805,7 +805,7 @@
       },
       "source": "napcat_normalized_snapshot",
       "source_revision": "5ee11502773e0426bfdeb22e9d2b28559d157295",
-      "confidence": 1.0,
+      "confidence": 1,
       "updated_at": "2026-08-03"
     },
     {
@@ -2007,7 +2007,7 @@
       },
       "source": "napcat_normalized_snapshot",
       "source_revision": "5ee11502773e0426bfdeb22e9d2b28559d157295",
-      "confidence": 1.0,
+      "confidence": 1,
       "updated_at": "2026-08-03"
     },
     {
@@ -2337,7 +2337,7 @@
       },
       "source": "napcat_normalized_snapshot",
       "source_revision": "5ee11502773e0426bfdeb22e9d2b28559d157295",
-      "confidence": 1.0,
+      "confidence": 1,
       "updated_at": "2026-08-03"
     },
     {
@@ -2597,7 +2597,7 @@
       },
       "source": "napcat_normalized_snapshot",
       "source_revision": "5ee11502773e0426bfdeb22e9d2b28559d157295",
-      "confidence": 1.0,
+      "confidence": 1,
       "updated_at": "2026-08-03"
     },
     {
@@ -2821,7 +2821,7 @@
       },
       "source": "napcat_normalized_snapshot",
       "source_revision": "5ee11502773e0426bfdeb22e9d2b28559d157295",
-      "confidence": 1.0,
+      "confidence": 1,
       "updated_at": "2026-08-03"
     },
     {
@@ -3783,7 +3783,7 @@
       },
       "source": "napcat_normalized_snapshot",
       "source_revision": "5ee11502773e0426bfdeb22e9d2b28559d157295",
-      "confidence": 1.0,
+      "confidence": 1,
       "updated_at": "2026-08-03"
     },
     {
@@ -3901,7 +3901,7 @@
       },
       "source": "napcat_normalized_snapshot",
       "source_revision": "5ee11502773e0426bfdeb22e9d2b28559d157295",
-      "confidence": 1.0,
+      "confidence": 1,
       "updated_at": "2026-08-03"
     },
     {
@@ -5454,7 +5454,7 @@
       },
       "source": "napcat_normalized_snapshot",
       "source_revision": "5ee11502773e0426bfdeb22e9d2b28559d157295",
-      "confidence": 1.0,
+      "confidence": 1,
       "updated_at": "2026-08-03"
     },
     {
@@ -5641,7 +5641,7 @@
       },
       "source": "napcat_normalized_snapshot",
       "source_revision": "5ee11502773e0426bfdeb22e9d2b28559d157295",
-      "confidence": 1.0,
+      "confidence": 1,
       "updated_at": "2026-08-03"
     },
     {
@@ -5688,7 +5688,7 @@
       },
       "source": "napcat_normalized_snapshot",
       "source_revision": "5ee11502773e0426bfdeb22e9d2b28559d157295",
-      "confidence": 1.0,
+      "confidence": 1,
       "updated_at": "2026-08-03"
     },
     {
@@ -5736,7 +5736,7 @@
       },
       "source": "napcat_normalized_snapshot",
       "source_revision": "5ee11502773e0426bfdeb22e9d2b28559d157295",
-      "confidence": 1.0,
+      "confidence": 1,
       "updated_at": "2026-08-03"
     },
     {
@@ -6134,7 +6134,7 @@
       },
       "source": "napcat_normalized_snapshot",
       "source_revision": "5ee11502773e0426bfdeb22e9d2b28559d157295",
-      "confidence": 1.0,
+      "confidence": 1,
       "updated_at": "2026-08-03"
     },
     {
@@ -10725,8 +10725,11 @@
         "data": {
           "id": "488"
         },
-        "default_result_id": "1",
-        "default_chain_count": 3
+        "hidden_trigger": {
+          "face_id": "487",
+          "result_id": "1",
+          "chain_count": 3
+        }
       }
     },
     {
