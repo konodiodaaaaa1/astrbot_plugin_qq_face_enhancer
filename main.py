@@ -57,6 +57,9 @@ def _send_parameters(record: FaceRecord) -> dict[str, Any]:
     variants = record.send_payload.get("variants", [])
     if isinstance(variants, list) and variants:
         parameters["variant"] = [str(item) for item in variants]
+    hidden_trigger = record.send_payload.get("hidden_trigger")
+    if isinstance(hidden_trigger, dict):
+        parameters["hidden_trigger"] = dict(hidden_trigger)
     return parameters
 
 

@@ -10207,6 +10207,11 @@
         "type": "face",
         "data": {
           "id": "422"
+        },
+        "hidden_trigger": {
+          "face_id": "417",
+          "result_id": "1",
+          "chain_count": 3
         }
       },
       "source": "napcat_normalized_snapshot",
@@ -10242,6 +10247,11 @@
         "type": "face",
         "data": {
           "id": "423"
+        },
+        "hidden_trigger": {
+          "face_id": "421",
+          "result_id": "1",
+          "chain_count": 3
         }
       },
       "source": "napcat_normalized_snapshot",
@@ -10557,6 +10567,11 @@
         "type": "face",
         "data": {
           "id": "432"
+        },
+        "hidden_trigger": {
+          "face_id": "431",
+          "result_id": "1",
+          "chain_count": 3
         }
       },
       "source": "napcat_normalized_snapshot",
@@ -10709,6 +10724,11 @@
         "type": "face",
         "data": {
           "id": "488"
+        },
+        "hidden_trigger": {
+          "face_id": "487",
+          "result_id": "1",
+          "chain_count": 3
         }
       }
     },

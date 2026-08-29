@@ -68,3 +68,34 @@ def test_rainbow_dragon_uses_the_same_tool_for_private_and_group(tmp_path, monke
         "effect": "rainbow_dragon_2024",
         "peer": {"type": "group", "id": "123456789"},
     }
+
+
+def test_school_hidden_face_uses_chain_end_trigger(tmp_path, monkeypatch):
+    catalog = FaceCatalog(tmp_path)
+    calls = []
+
+    def request(endpoint, token, payload, timeout):
+        calls.append(payload)
+        return {"code": 0, "data": {"message_id": "school-hidden"}}
+
+    monkeypatch.setattr(sender, "_native_request", request)
+    config = {
+        "napcat_extended_api_url": "http://127.0.0.1:6099/plugin/face/api",
+        "napcat_extended_api_token": "test-token",
+    }
+    result = asyncio.run(
+        sender.send_face(event=Event(), catalog=catalog, face_id="488", config=config)
+    )
+
+    assert "triggerId=487" in result
+    assert calls[0]["face"] == {
+        "face_id": "487",
+        "face_type": 3,
+        "face_text": "开学接龙终段",
+        "pack_id": "1",
+        "sticker_id": "89",
+        "source_type": 1,
+        "sticker_type": 3,
+        "result_id": "1",
+        "chain_count": 3,
+    }

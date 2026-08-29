@@ -211,6 +211,14 @@ async def send_face(
     if chain_action not in {"auto", "start", "continue"}:
         return "发送失败：chain_action 只能是 auto、start 或 continue。"
 
+    wire_record = record
+    hidden_trigger = record.send_payload.get("hidden_trigger")
+    if isinstance(hidden_trigger, dict):
+        trigger_id = str(hidden_trigger.get("face_id", "")).strip()
+        trigger_record = catalog.get(trigger_id, family) if trigger_id else None
+        if trigger_record and trigger_record.face_kind == "chain_super":
+            wire_record = trigger_record
+
     clean_variant = str(variant or "").strip()
     variants = record.send_payload.get("variants", [])
     available_variants = {
@@ -240,7 +248,7 @@ async def send_face(
     explicit_chain_count = chain_count not in (None, "")
     parsed_chain_count: int | None = None
     if explicit_chain_count:
-        if record.face_kind != "chain_super":
+        if record.face_kind != "chain_super" and wire_record.face_kind != "chain_super":
             return "发送失败：chain_count 仅适用于接龙超级表情（chain_super）。"
         raw_chain_count = str(chain_count).strip()
         if not raw_chain_count or any(
@@ -265,7 +273,16 @@ async def send_face(
         clean_text = ""
 
     effective_chain_count: int | None = None
-    if record.face_kind == "chain_super":
+    if wire_record is not record:
+        if not clean_result_id:
+            clean_result_id = str(hidden_trigger.get("result_id", "1"))
+        effective_chain_count = parsed_chain_count
+        if effective_chain_count is None:
+            try:
+                effective_chain_count = int(hidden_trigger.get("chain_count", 3))
+            except (TypeError, ValueError):
+                effective_chain_count = 3
+    elif record.face_kind == "chain_super":
         if parsed_chain_count is not None:
             if record.chain_role == "start" and chain_action == "continue":
                 return "发送失败：接龙起点不能作为续接表情发送。"
@@ -288,13 +305,13 @@ async def send_face(
                 return f"发送失败：近期会话中没有可续接的 {record.chain_group} 接龙。"
 
     native_required = bool(
-        record.face_kind in {"super", "random_super", "chain_super"}
-        or int(record.id) > 432
+        wire_record.face_kind in {"super", "random_super", "chain_super"}
+        or int(wire_record.id) > 432
     )
     if native_required and _native_endpoint(config):
         used, error = await _send_native_face(
             event,
-            record,
+            wire_record,
             text=clean_text,
             result_id=clean_result_id,
             chain_count=effective_chain_count,
@@ -303,19 +320,21 @@ async def send_face(
         if used:
             if error:
                 return error
-            if chain_tracker and record.face_kind == "chain_super":
-                chain_tracker.observe(_session_id(event), record, effective_chain_count)
+            if chain_tracker and wire_record.face_kind == "chain_super":
+                chain_tracker.observe(_session_id(event), wire_record, effective_chain_count)
             event.set_extra("qqface.tool_sent", True)
             details = [f"face_id={record.id}", effective_mode, "native=napcat"]
             if clean_result_id:
                 details.append(f"resultId={clean_result_id}")
             if parsed_chain_count is not None:
                 details.append(f"chainCount={parsed_chain_count}")
+            if wire_record is not record:
+                details.append(f"triggerId={wire_record.id}")
             return f"已发送 QQ {record.canonical_name}（{'，'.join(details)}）。"
 
     uses_raw = (
-        record.face_kind == "chain_super"
-        or record.id in {"358", "359"}
+        wire_record.face_kind == "chain_super"
+        or wire_record.id in {"358", "359"}
         or bool(clean_result_id)
         or parsed_chain_count is not None
     )
@@ -324,7 +343,7 @@ async def send_face(
         if clean_text:
             segments.append({"type": "text", "data": {"text": clean_text}})
         segments.append(
-            _advanced_segment(record, effective_chain_count, clean_result_id)
+            _advanced_segment(wire_record, effective_chain_count, clean_result_id)
         )
         try:
             await _send_onebot_segments(event, segments)
@@ -337,8 +356,8 @@ async def send_face(
         chain.append(Face(id=int(record.id)))
         await event.send(MessageChain(chain))
 
-    if chain_tracker and record.face_kind == "chain_super":
-        chain_tracker.observe(_session_id(event), record, effective_chain_count)
+    if chain_tracker and wire_record.face_kind == "chain_super":
+        chain_tracker.observe(_session_id(event), wire_record, effective_chain_count)
     event.set_extra("qqface.tool_sent", True)
     kind_label = {
         "normal": "普通表情",
@@ -351,4 +370,6 @@ async def send_face(
         details.append(f"resultId={clean_result_id}")
     if parsed_chain_count is not None:
         details.append(f"chainCount={parsed_chain_count}")
+    if wire_record is not record:
+        details.append(f"triggerId={wire_record.id}")
     return f"已发送 QQ {kind_label}：{record.canonical_name}（{'，'.join(details)}）。"
