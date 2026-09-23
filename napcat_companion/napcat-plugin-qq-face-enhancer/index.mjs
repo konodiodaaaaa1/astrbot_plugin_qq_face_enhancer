@@ -9,6 +9,7 @@ const CHAT_GROUP = 2;
 const FACE_NORMAL = 2;
 const FACE_ANIMATED = 3;
 const SPECIAL_RAINBOW_DRAGON = "rainbow_dragon_2024";
+const SPECIAL_SCHOOL_OPENING = "school_opening_2026";
 const SEND_MESSAGE_COMMAND = "MessageSvc.PbSendMsg";
 
 let pluginConfig = { token: "" };
@@ -200,6 +201,57 @@ export function buildRainbowDragonPacket({
   );
 }
 
+export function buildSchoolOpeningPacket({
+  peerType,
+  peerId,
+  peerUid = "",
+  messageSequence,
+  messageRandom,
+  timestamp
+}) {
+  let route;
+  if (peerType === "private") {
+    if (!peerUid) throw new Error("peerUid is required for school opening sending");
+    route = fieldBytes(1, fieldBytes(2, peerUid));
+  } else if (peerType === "group") {
+    route = fieldBytes(2, fieldVarint(1, BigInt(positiveId(peerId, "group_id"))));
+  } else {
+    throw new Error("peer.type must be private or group");
+  }
+  const bigFace = concatFields(
+    fieldBytes(1, "1"),
+    fieldBytes(2, "90"),
+    fieldVarint(3, 488),
+    fieldVarint(5, 4294967299n),
+    fieldBytes(6, "1"),
+    fieldBytes(7, "/开学大吉"),
+    fieldBytes(8, "100")
+  );
+  const common = concatFields(
+    fieldVarint(1, 37),
+    fieldBytes(2, bigFace),
+    fieldVarint(3, 1)
+  );
+  const faceElement = fieldBytes(53, common);
+  const fallbackText = concatFields(
+    fieldBytes(1, "/开学大吉"),
+    fieldBytes(12, fieldBytes(1, "[开学大吉]请使用最新版手机QQ体验新功能"))
+  );
+  const textElement = fieldBytes(1, fallbackText);
+  const richText = concatFields(fieldBytes(2, faceElement), fieldBytes(2, textElement));
+  const body = fieldBytes(1, richText);
+  const contentHead = concatFields(fieldVarint(1, 1), fieldVarint(2, 0), fieldVarint(3, 0));
+  const syncCookie = fieldVarint(1, timestamp);
+  return concatFields(
+    fieldBytes(1, route),
+    fieldBytes(2, contentHead),
+    fieldBytes(3, body),
+    fieldVarint(4, messageSequence),
+    fieldVarint(5, messageRandom),
+    fieldBytes(6, syncCookie)
+  );
+}
+
 export function parseSendMessageResponse(input) {
   const fields = decodeProtoFields(input);
   return {
@@ -294,7 +346,7 @@ export async function plugin_init(ctx) {
       data: {
         ready: Boolean(ctx.core?.apis?.MsgApi),
         native_send: true,
-        special_effects: [SPECIAL_RAINBOW_DRAGON]
+        special_effects: [SPECIAL_RAINBOW_DRAGON, SPECIAL_SCHOOL_OPENING]
       }
     });
   });
@@ -319,7 +371,7 @@ export async function plugin_init(ctx) {
     try {
       const body = req.body || {};
       const effect = String(body.effect || "");
-      if (effect !== SPECIAL_RAINBOW_DRAGON) throw new Error("unknown special effect");
+      if (![SPECIAL_RAINBOW_DRAGON, SPECIAL_SCHOOL_OPENING].includes(effect)) throw new Error("unknown special effect");
       const peer = body.peer || {};
       const peerType = String(peer.type || body.message_type || "").toLowerCase();
       const peerId = peer.id ?? (peerType === "group" ? body.group_id : body.user_id);
@@ -344,7 +396,8 @@ export async function plugin_init(ctx) {
       let messageSequence = 0;
       for (let attempt = 0; attempt < 8; attempt++) {
         messageSequence = await nextClientSequence(ctx, targetPeer);
-        const packet = buildRainbowDragonPacket({
+        const packetBuilder = effect === SPECIAL_SCHOOL_OPENING ? buildSchoolOpeningPacket : buildRainbowDragonPacket;
+        const packet = packetBuilder({
           peerType,
           peerId: targetId,
           peerUid,

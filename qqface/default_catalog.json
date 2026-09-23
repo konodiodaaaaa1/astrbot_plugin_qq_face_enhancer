@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "catalog_version": "2026-08-29-school-season",
-  "source": "NapCatQQ/NapCatQQ face_config.json (normalized subset)",
-  "source_revision": "qq-9.3.50-2026-08-29",
-  "source_path": "packages/napcat-core/external/face_config.json",
+  "catalog_version": "2026-09-23-midautumn",
+  "source": "QQNT live fetchFullSysEmojis normalized subset",
+  "source_revision": "qq-9.9.30-2026-09-23",
+  "source_path": "KernelBaseEmojiService.fetchFullSysEmojis",
   "license": "licenses/NAPCAT-LICENSE.txt",
   "faces": [
     {
@@ -10725,11 +10725,9 @@
         "data": {
           "id": "488"
         },
-        "hidden_trigger": {
-          "face_id": "487",
-          "result_id": "1",
-          "chain_count": 3
-        }
+        "variants": [
+          "school_opening_2026"
+        ]
       }
     },
     {
@@ -10910,6 +10908,376 @@
         "type": "face",
         "data": {
           "id": "493"
+        }
+      }
+    },
+    {
+      "protocol": "onebot_v11",
+      "adapter": "aiocqhttp",
+      "family": "system_face",
+      "aliases": [
+        "举杯"
+      ],
+      "social_meanings": [],
+      "tone": [],
+      "usage_contexts": [],
+      "avoid_contexts": [],
+      "sendable": true,
+      "source": "qq_9.9.30_midautumn_2026",
+      "source_revision": "qq-9.9.30-2026-09-23",
+      "confidence": 0.98,
+      "updated_at": "2026-09-23",
+      "id": "494",
+      "canonical_name": "举杯邀月",
+      "literal_description": "举杯邀月",
+      "face_kind": "super",
+      "face_type": 3,
+      "sticker_type": 1,
+      "pack_id": "4",
+      "pack_name": "",
+      "sticker_id": "96",
+      "em_code": "10494",
+      "hidden": false,
+      "standalone_preferred": true,
+      "chain_group": "",
+      "chain_role": "",
+      "send_payload": {
+        "type": "face",
+        "data": {
+          "id": "494"
+        }
+      }
+    },
+    {
+      "protocol": "onebot_v11",
+      "adapter": "aiocqhttp",
+      "family": "system_face",
+      "aliases": [
+        "玉兔"
+      ],
+      "social_meanings": [],
+      "tone": [],
+      "usage_contexts": [],
+      "avoid_contexts": [],
+      "sendable": true,
+      "source": "qq_9.9.30_midautumn_2026",
+      "source_revision": "qq-9.9.30-2026-09-23",
+      "confidence": 0.98,
+      "updated_at": "2026-09-23",
+      "id": "495",
+      "canonical_name": "兔来",
+      "literal_description": "兔来",
+      "face_kind": "super",
+      "face_type": 3,
+      "sticker_type": 1,
+      "pack_id": "4",
+      "pack_name": "",
+      "sticker_id": "97",
+      "em_code": "10495",
+      "hidden": false,
+      "standalone_preferred": true,
+      "chain_group": "",
+      "chain_role": "",
+      "send_payload": {
+        "type": "face",
+        "data": {
+          "id": "495"
+        }
+      }
+    },
+    {
+      "protocol": "onebot_v11",
+      "adapter": "aiocqhttp",
+      "family": "system_face",
+      "aliases": [
+        "月相"
+      ],
+      "social_meanings": [],
+      "tone": [],
+      "usage_contexts": [],
+      "avoid_contexts": [],
+      "sendable": true,
+      "source": "qq_9.9.30_midautumn_2026",
+      "source_revision": "qq-9.9.30-2026-09-23",
+      "confidence": 0.98,
+      "updated_at": "2026-09-23",
+      "id": "496",
+      "canonical_name": "阴晴圆缺",
+      "literal_description": "阴晴圆缺",
+      "face_kind": "super",
+      "face_type": 3,
+      "sticker_type": 1,
+      "pack_id": "4",
+      "pack_name": "",
+      "sticker_id": "98",
+      "em_code": "10496",
+      "hidden": false,
+      "standalone_preferred": true,
+      "chain_group": "",
+      "chain_role": "",
+      "send_payload": {
+        "type": "face",
+        "data": {
+          "id": "496"
+        }
+      }
+    },
+    {
+      "protocol": "onebot_v11",
+      "adapter": "aiocqhttp",
+      "family": "system_face",
+      "aliases": [
+        "放假"
+      ],
+      "social_meanings": [],
+      "tone": [],
+      "usage_contexts": [],
+      "avoid_contexts": [],
+      "sendable": true,
+      "source": "qq_9.9.30_midautumn_2026",
+      "source_revision": "qq-9.9.30-2026-09-23",
+      "confidence": 0.98,
+      "updated_at": "2026-09-23",
+      "id": "497",
+      "canonical_name": "休假了",
+      "literal_description": "休假了",
+      "face_kind": "super",
+      "face_type": 3,
+      "sticker_type": 1,
+      "pack_id": "4",
+      "pack_name": "",
+      "sticker_id": "99",
+      "em_code": "10497",
+      "hidden": false,
+      "standalone_preferred": true,
+      "chain_group": "",
+      "chain_role": "",
+      "send_payload": {
+        "type": "face",
+        "data": {
+          "id": "497"
+        }
+      }
+    },
+    {
+      "protocol": "onebot_v11",
+      "adapter": "aiocqhttp",
+      "family": "system_face",
+      "aliases": [
+        "中秋"
+      ],
+      "social_meanings": [],
+      "tone": [],
+      "usage_contexts": [],
+      "avoid_contexts": [],
+      "sendable": true,
+      "source": "qq_9.9.30_midautumn_2026",
+      "source_revision": "qq-9.9.30-2026-09-23",
+      "confidence": 0.98,
+      "updated_at": "2026-09-23",
+      "id": "498",
+      "canonical_name": "中!",
+      "literal_description": "中!",
+      "face_kind": "super",
+      "face_type": 3,
+      "sticker_type": 1,
+      "pack_id": "4",
+      "pack_name": "",
+      "sticker_id": "100",
+      "em_code": "10498",
+      "hidden": false,
+      "standalone_preferred": true,
+      "chain_group": "",
+      "chain_role": "",
+      "send_payload": {
+        "type": "face",
+        "data": {
+          "id": "498"
+        }
+      }
+    },
+    {
+      "protocol": "onebot_v11",
+      "adapter": "aiocqhttp",
+      "family": "system_face",
+      "aliases": [
+        "赏月"
+      ],
+      "social_meanings": [],
+      "tone": [],
+      "usage_contexts": [],
+      "avoid_contexts": [],
+      "sendable": true,
+      "source": "qq_9.9.30_midautumn_2026",
+      "source_revision": "qq-9.9.30-2026-09-23",
+      "confidence": 0.98,
+      "updated_at": "2026-09-23",
+      "id": "499",
+      "canonical_name": "观月C位",
+      "literal_description": "观月C位",
+      "face_kind": "super",
+      "face_type": 3,
+      "sticker_type": 1,
+      "pack_id": "4",
+      "pack_name": "",
+      "sticker_id": "101",
+      "em_code": "10499",
+      "hidden": false,
+      "standalone_preferred": true,
+      "chain_group": "",
+      "chain_role": "",
+      "send_payload": {
+        "type": "face",
+        "data": {
+          "id": "499"
+        }
+      }
+    },
+    {
+      "protocol": "onebot_v11",
+      "adapter": "aiocqhttp",
+      "family": "system_face",
+      "aliases": [
+        "赏月接龙"
+      ],
+      "social_meanings": [],
+      "tone": [],
+      "usage_contexts": [],
+      "avoid_contexts": [],
+      "sendable": true,
+      "source": "qq_9.9.30_midautumn_2026",
+      "source_revision": "qq-9.9.30-2026-09-23",
+      "confidence": 0.98,
+      "updated_at": "2026-09-23",
+      "id": "500",
+      "canonical_name": "秋秋赏月",
+      "literal_description": "秋秋赏月",
+      "face_kind": "chain_super",
+      "face_type": 3,
+      "sticker_type": 3,
+      "pack_id": "1",
+      "pack_name": "",
+      "sticker_id": "102",
+      "em_code": "10500",
+      "hidden": false,
+      "standalone_preferred": true,
+      "chain_group": "autumn_2026",
+      "chain_role": "start",
+      "send_payload": {
+        "type": "face",
+        "data": {
+          "id": "500"
+        }
+      }
+    },
+    {
+      "protocol": "onebot_v11",
+      "adapter": "aiocqhttp",
+      "family": "system_face",
+      "aliases": [
+        "中秋接龙"
+      ],
+      "social_meanings": [],
+      "tone": [],
+      "usage_contexts": [],
+      "avoid_contexts": [],
+      "sendable": true,
+      "source": "qq_9.9.30_midautumn_2026",
+      "source_revision": "qq-9.9.30-2026-09-23",
+      "confidence": 0.98,
+      "updated_at": "2026-09-23",
+      "id": "501",
+      "canonical_name": "秋秋之约",
+      "literal_description": "秋秋之约",
+      "face_kind": "chain_super",
+      "face_type": 3,
+      "sticker_type": 3,
+      "pack_id": "1",
+      "pack_name": "",
+      "sticker_id": "103",
+      "em_code": "10501",
+      "hidden": true,
+      "standalone_preferred": true,
+      "chain_group": "autumn_2026",
+      "chain_role": "middle",
+      "send_payload": {
+        "type": "face",
+        "data": {
+          "id": "501"
+        }
+      }
+    },
+    {
+      "protocol": "onebot_v11",
+      "adapter": "aiocqhttp",
+      "family": "system_face",
+      "aliases": [
+        "中秋接龙"
+      ],
+      "social_meanings": [],
+      "tone": [],
+      "usage_contexts": [],
+      "avoid_contexts": [],
+      "sendable": true,
+      "source": "qq_9.9.30_midautumn_2026",
+      "source_revision": "qq-9.9.30-2026-09-23",
+      "confidence": 0.98,
+      "updated_at": "2026-09-23",
+      "id": "502",
+      "canonical_name": "秋秋泛舟",
+      "literal_description": "秋秋泛舟",
+      "face_kind": "chain_super",
+      "face_type": 3,
+      "sticker_type": 3,
+      "pack_id": "1",
+      "pack_name": "",
+      "sticker_id": "104",
+      "em_code": "10502",
+      "hidden": true,
+      "standalone_preferred": true,
+      "chain_group": "autumn_2026",
+      "chain_role": "end",
+      "send_payload": {
+        "type": "face",
+        "data": {
+          "id": "502"
+        }
+      }
+    },
+    {
+      "protocol": "onebot_v11",
+      "adapter": "aiocqhttp",
+      "family": "system_face",
+      "aliases": [
+        "中秋隐藏表情"
+      ],
+      "social_meanings": [],
+      "tone": [],
+      "usage_contexts": [],
+      "avoid_contexts": [],
+      "sendable": true,
+      "source": "qq_9.9.30_midautumn_2026",
+      "source_revision": "qq-9.9.30-2026-09-23",
+      "confidence": 0.98,
+      "updated_at": "2026-09-23",
+      "id": "503",
+      "canonical_name": "秋愿达成",
+      "literal_description": "秋愿达成",
+      "face_kind": "super",
+      "face_type": 3,
+      "sticker_type": 1,
+      "pack_id": "1",
+      "pack_name": "",
+      "sticker_id": "105",
+      "em_code": "10503",
+      "hidden": true,
+      "standalone_preferred": true,
+      "chain_group": "",
+      "chain_role": "",
+      "send_payload": {
+        "type": "face",
+        "data": {
+          "id": "503"
         }
       }
     }

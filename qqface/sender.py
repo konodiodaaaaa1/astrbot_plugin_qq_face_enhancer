@@ -13,7 +13,8 @@ from .catalog import FaceCatalog, FaceRecord
 from .chain import ChainStateTracker
 
 RAINBOW_DRAGON_VARIANT = "rainbow_dragon_2024"
-STRICT_NATIVE_FACE_IDS = {"485", "486", "487", "488", "489", "490", "491", "492", "493"}
+SCHOOL_OPENING_VARIANT = "school_opening_2026"
+STRICT_NATIVE_FACE_IDS = {"485", "486", "487", "488", "489", "490", "491", "492", "493", "494", "495", "496", "497", "498", "499", "500", "501", "502", "503"}
 
 
 def _session_id(event: Any) -> str:
@@ -236,10 +237,8 @@ async def send_face(
         event.set_extra("qqface.tool_sent", True)
         sequence = str(data.get("message_seq") or "")
         detail = f"，message_seq={sequence}" if sequence else ""
-        return (
-            f"已发送 QQ 隐藏表情：七彩祥龙（face_id={record.id}，"
-            f"variant={clean_variant}{detail}）。"
-        )
+        label = "七彩祥龙" if clean_variant == RAINBOW_DRAGON_VARIANT else "开学大吉"
+        return f"已发送 QQ 隐藏表情：{label}（face_id={record.id}，variant={clean_variant}{detail}）。"
 
     raw_result_id = "" if result_id is None else str(result_id)
     if len(raw_result_id) > 128 or any(ord(char) < 32 for char in raw_result_id):

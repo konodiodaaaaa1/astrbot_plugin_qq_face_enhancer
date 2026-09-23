@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   buildRainbowDragonPacket,
+  buildSchoolOpeningPacket,
   decodeProtoFields,
   parseSendMessageResponse
 } from "../napcat_companion/napcat-plugin-qq-face-enhancer/index.mjs";
@@ -14,6 +15,24 @@ function bytesField(fields, tag, index = 0) {
 function varintField(fields, tag) {
   return fields.find((field) => field.tag === tag && field.wireType === 0)?.value;
 }
+
+test("builds school opening hidden packet from chain end 487", () => {
+  const packet = buildSchoolOpeningPacket({
+    peerType: "private",
+    peerId: "2452585759",
+    peerUid: "u_NriMlGKndiASGXWn5WIQqA",
+    messageSequence: 5001,
+    messageRandom: 6001,
+    timestamp: 1787989000
+  });
+  const face = rainbowFields(packet);
+  assert.equal(bytesField(face, 1).toString(), "1");
+  assert.equal(bytesField(face, 2).toString(), "90");
+  assert.equal(varintField(face, 3), 488n);
+  assert.equal(varintField(face, 5), 4294967299n);
+  assert.equal(bytesField(face, 6).toString(), "1");
+  assert.equal(bytesField(face, 8).toString(), "100");
+});
 
 function rainbowFields(packet) {
   const outer = decodeProtoFields(packet);
